@@ -34,30 +34,30 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   bool _isLoading = true;
   late CameraController _cameraController;
-  String? data;//mot used
+  String? data;//not used
   Timer? mytimer; //not used
-  String? datetime;// unique filename
   StreamSubscription? gpsCurrPosStream;
-  int? srtIndex;
-  String? folder_name;
-  String? csv_path;
-  String? video_path;
-  String? projectid;
-  String? videoCsvFolderPath;
+  int? srtIndex;//not used
 
+  //Folder structure :- csv,video
+  String? videoCsvFolderPath;
+  String? folderName;
+  String? videoFileName;
+  String? csvFileName;// unique csv filename
+  String? csvPath;
+  String? videoPath;
+
+  //api
+  String? projectid;
   String? serverIpAddress='http://15.206.73.160:8081/api';
   String? token;
 
-
-// File? file;
 
   @override
   void initState() {
     super.initState();
     _initCamera();
   }
-
-
 
 
   Future<String> get _localPath async {
@@ -69,13 +69,11 @@ class _CameraPageState extends State<CameraPage> {
 //Making a file
   Future<File> get _localFile async {
     final path = await _localPath;
-    final String videoCsvDirectory = '$path/$folder_name';
+    final String videoCsvDirectory = '$path/$folderName';
     await Directory(videoCsvDirectory).create(recursive: true);
-    setState(() => videoCsvFolderPath ='$videoCsvDirectory' );
-    setState(() => csv_path ='$videoCsvDirectory/$datetime' );
-
-
-    return File('$videoCsvDirectory/$datetime');
+    setState(() => videoCsvFolderPath =videoCsvDirectory );
+    setState(() => csvPath ='$videoCsvDirectory/$csvFileName.csv' );
+    return File('$videoCsvDirectory/$csvFileName.csv');
   }
 
 //Reading file (Not Needed Now)
@@ -92,23 +90,8 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
-//(Not used now)
-  Future<String> _miliToTimeFormat(int milisec) async{
-    int hour;
-    int min;
-    int sec;
-    int mili = milisec%1000;
-    sec = (milisec/1000)%60 as int;
-    min = ((milisec/1000)/60)%60 as int;
-    hour = ((milisec/1000)/60)/60 as int;
-
-    return '';
-  }
 
 
-  // late String time1;
-  // late String time2;
-  // int srtInd = 0;
 
 // Getting permission for gps, checking for GPS, Getting latitude & longitude
   _determinePosition() async {
@@ -148,17 +131,15 @@ class _CameraPageState extends State<CameraPage> {
       //when going to the background
 
     );
+
+    //Make the csv file and then write while listening for the gps co-ordinates.
+    final csvFile =  await _localFile;
     gpsCurrPosStream = Geolocator.getPositionStream(locationSettings: locationoptions).listen((position) async{
-      final file =  await _localFile;
       var dt = DateTime.now();
       String latitude = position.latitude.toString();
       String longitude = position.longitude.toString();
-      // String time = '${dt.hour}-${dt.minute}-${dt.second}';
-      // srtInd++;
       String currTime = dt.toUtc().toString();
-
-      file.writeAsString('GPS($latitude $longitude),$currTime \n',mode: FileMode.append);
-
+      csvFile.writeAsString('GPS($latitude $longitude),$currTime\n',mode: FileMode.append);
       print('---------------------------GPS($latitude $longitude),$currTime \n');
     });
   }
@@ -170,6 +151,7 @@ class _CameraPageState extends State<CameraPage> {
     print(placemark);
   }
 
+
   //Get token (API call :- 1)
   Future<dynamic> gettoken() async {
     final response = await http.post(
@@ -179,17 +161,16 @@ class _CameraPageState extends State<CameraPage> {
       }
     );
     final body = json.decode(response.body);
-    setState(() =>
-    projectid = body['data']['_id'].toString() //ProjectId
-    );
-
+    // setState(() =>
+    // projectid = body['data']['_id'].toString() //ProjectId
+    // );
     // print('--------------------------------------'+ projectid.toString());
     // print('--------------------------------------'+ body.toString());
 
     if (response.statusCode == 200) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
-      print('--------------------------------------'+ body['data']['token'].toString());
+      print('--------------------------------------token:'+ body['data']['token'].toString());
       setState(() => token = body['data']['token']);
 
       // token = body['data']['token'];
@@ -217,21 +198,19 @@ class _CameraPageState extends State<CameraPage> {
       }),
     );
     final body = json.decode(response.body);
-    print( '-------------------------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
-    setState(() => projectid = body['_id']);
+    print( '----------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
+    // setState(() => projectid = body['_id']);
 
     if (response.statusCode == 200) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
       setState(() => projectid = body['_id']);
 
-      // print( '-------------------------------------:::::::::::::::::::::::::-----------'+body.toString());
-
       return project.fromJson(jsonDecode(response.body));
     } else {
       // If the server did not return a 201 CREATED response,
       // then throw an exception.
-      throw Exception('Failed to create album.');
+      throw Exception('Failed to create project.');
     }
   }
 
@@ -245,19 +224,18 @@ class _CameraPageState extends State<CameraPage> {
     request.headers.addAll(headers);
     // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
     request.files.add(await http.MultipartFile.fromPath('video', videoPath.path,filename: '$projectid' + '_video.mp4',contentType: MediaType('video', 'mp4')));
-    print('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::project id :- '+projectid!);
 
-    print('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::token :- '+token!);
+    print(':::::::::::::::project id :- '+projectid!);
+    print('::::::::::::::::::token :- '+token!);
 
     request.send().then((response) {
-      print(':;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
+      print(':;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
       http.Response.fromStream(response).then((onValue) {
-
         try {
           // get your response here...
         } catch (e) {
           // handle exeption
-          print('------------------------------------------------------------'+e.toString());
+          print('------------'+e.toString());
 
         }
       });
@@ -267,22 +245,19 @@ class _CameraPageState extends State<CameraPage> {
 
   //Upload csv file to server (API call :- 4)
   uploadCsvToServer(String Csvpath) async {
-    // String pi = projectid!;
     Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
     var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/csvForConversionToSrt'),);
     request.headers.addAll(headers);
     // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
     request.files.add(await http.MultipartFile.fromPath('csv', Csvpath,filename: '$projectid' + 'new.csv',contentType: MediaType('application', 'vnd.ms-excel')));
-    // print('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::'+imagePath.path);
     request.send().then((response) {
-      print(':;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
+      print(':;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
       http.Response.fromStream(response).then((onValue) {
-
         try {
           // get your response here...
         } catch (e) {
           // handle exeption
-          print('------------------------------------------------------------'+e.toString());
+          print('-------------------------------'+e.toString());
 
         }
       });
@@ -340,6 +315,7 @@ class _CameraPageState extends State<CameraPage> {
     setState(() => _isLoading = false);
   }
 
+  //not needed
   Future<File> moveFile(File sourceFile, String newPath) async {
     try {
       // prefer using rename as it is probably faster
@@ -357,19 +333,20 @@ class _CameraPageState extends State<CameraPage> {
   bool _isRecording = false;
   _recordVideo() async {
     if (_isRecording) {
-      final XFile? file = await _cameraController.stopVideoRecording();
-
-      File videoFile = File(file!.path);
+      final XFile? vidFile = await _cameraController.stopVideoRecording();
+      //move to same folder from cache and delete
+      File videoFile = File(vidFile!.path);
       await videoFile.copy(
-        '$videoCsvFolderPath/$datetime.mp4',
+        '$videoCsvFolderPath/$videoFileName.mp4',
       );
+      //yet to add delete from cache
 
+      //
       // mytimer?.cancel();
       setState(() => _isRecording = false);
       await gpsCurrPosStream?.cancel();  //cancelling gps stream once recording gets stop.
-
-      await uploadVideoToServer(file);
-      await uploadCsvToServer(csv_path!);
+      await uploadVideoToServer(vidFile); // upload video to server
+      await uploadCsvToServer(csvPath!); // upload csv file to server
 
       //navigating to preview
       // final route = MaterialPageRoute(
@@ -380,22 +357,20 @@ class _CameraPageState extends State<CameraPage> {
       //  Navigator.push(context, route);
 
     } else {
-      final file =  await _localFile;
+      // file =  await _localFile;
       await _cameraController.prepareForVideoRecording();
       await _cameraController.startVideoRecording();
+      await gettoken();
+      await getprojectid();
       setState(() => _isRecording = true);
       //assigning unique file name on every start recording key is pressed.
       setState(() {
         var dt = DateTime.now();
-        String s = dt.toIso8601String();
-        datetime = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}.csv';
-        folder_name = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
-
+        csvFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
+        videoFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
+        folderName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
       });
-
       await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long)
-      await gettoken();
-      await getprojectid();
 
 
 
