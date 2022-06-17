@@ -40,12 +40,12 @@ class MyApp extends StatelessWidget {
       },
       title: 'Flutter Demo',
       theme: ThemeData(
-
+        backgroundColor: Colors.pink,
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
 
-      home: const MyHomePage(title: 'RealTime-Journey-Recorder'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -60,38 +60,129 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  TextEditingController name = TextEditingController();
+  TextEditingController desciption = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Multi-Page'),
-          backgroundColor: Colors.green,
-        ),
-        body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                ElevatedButton(
-                  child: const Text('Next Page'),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/second');
-                  },
-                  /* Contains the code that helps us
-			navigate to the second route. */
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage('assets/images/login.png'), fit: BoxFit.cover),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(children: [
+          Container(
+            padding: const EdgeInsets.only(left: 35, top: 80),
+            child: const Text(
+              "RealTime- JourneyRecorder",
+              style: TextStyle(color: Colors.white, fontSize: 40),
+            )
+            ,
 
+          ),
+          SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.only(
+                  right: 35,
+                  left: 35,
+                  top: MediaQuery.of(context).size.height * 0.5),
+              child: Column(children: [
+                TextField(
+                  controller: name,
+                  decoration: InputDecoration(
+                    fillColor: Colors.grey.shade100,
+                    filled: true,
+                    hintText: 'Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
-                ElevatedButton(
-                  child: const Text('Third page!'),
-                  onPressed: () {
-                    /* Contains the code that helps us
-			navigate to the third route. */
-                    Navigator.pushNamed(context, '/third');
-                  },
+                const SizedBox(
+                  height: 30,
                 ),
-              ],
-            )),
-        floatingActionButton: FloatingActionButton(onPressed: () { Navigator.pushNamed(context, '/second'); },
-            child: const Text('Next'))
+                TextField(
+                  controller: desciption,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    fillColor: Colors.grey.shade100,
+                    filled: true,
+                    hintText: 'Description',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Start a Journey',
+                      style: TextStyle(
+                        color: Color(0xff4c505b),
+                        fontSize: 27,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: const Color(0xff4c505b),
+                      child: IconButton(
+                        color: Colors.white,
+                        onPressed: () {
+                          String nametextToSend = name.text;
+                          String desctextToSend = desciption.text;
+
+
+                          Navigator.push(context,CupertinoPageRoute(builder: (context) => const CameraPage()));
+                        },
+                        icon: const Icon(Icons.arrow_forward),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, 'register');
+                        },
+                        child: const Text(
+                          '',//sign up
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            fontSize: 18,
+                            color: Color(0xff4c505b),
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          '',//forgot password
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            fontSize: 18,
+                            color: Color(0xff4c505b),
+                          ),
+                        ),
+                      ),
+                    ]),
+              ]),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }

@@ -25,7 +25,7 @@ class project {
   }
 }
 class CameraPage extends StatefulWidget {
-  const CameraPage({Key? key}) : super(key: key);
+  const CameraPage({Key? key, required String name, required String description}) : super(key: key);
 
   @override
   _CameraPageState createState() => _CameraPageState();
@@ -38,6 +38,9 @@ class _CameraPageState extends State<CameraPage> {
   Timer? mytimer; //not used
   StreamSubscription? gpsCurrPosStream;
   int? srtIndex;//not used
+
+  String? name;
+  String? description;
 
   //Folder structure :- csv,video
   String? videoCsvFolderPath;
@@ -139,7 +142,12 @@ class _CameraPageState extends State<CameraPage> {
       String latitude = position.latitude.toString();
       String longitude = position.longitude.toString();
       String currTime = dt.toUtc().toString();
-      csvFile.writeAsString('GPS($latitude $longitude),$currTime\n',mode: FileMode.append);
+      String accuracy = position.accuracy.toString();
+      String? timestamp = position.timestamp?.toUtc().toString();
+      String altitude = position.altitude.toString();
+      String speed = position.speed.toString();
+      String speedAcurracy = position.speedAccuracy.toString();
+      csvFile.writeAsString('GPS($latitude $longitude),$timestamp,$accuracy,$altitude,$speed,$speedAcurracy\n',mode: FileMode.append);
       print('---------------------------GPS($latitude $longitude),$currTime \n');
     });
   }
@@ -310,7 +318,7 @@ class _CameraPageState extends State<CameraPage> {
   _initCamera() async {
     final cameras = await availableCameras();
     final front = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.back);
-    _cameraController = CameraController(front, ResolutionPreset.high);
+    _cameraController = CameraController(front, ResolutionPreset.veryHigh);
     await _cameraController.initialize();
     setState(() => _isLoading = false);
   }
@@ -339,8 +347,8 @@ class _CameraPageState extends State<CameraPage> {
       await videoFile.copy(
         '$videoCsvFolderPath/$videoFileName.mp4',
       );
-      //yet to add delete from cache
-
+      //delete from cache
+      // await videoFile.delete();
       //
       // mytimer?.cancel();
       setState(() => _isRecording = false);
