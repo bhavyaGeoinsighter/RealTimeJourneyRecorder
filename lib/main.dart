@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDe coration(
+        decoration: const BoxDecoration(
         image: DecorationImage(
         image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
     ),
