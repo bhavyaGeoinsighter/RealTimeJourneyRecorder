@@ -131,7 +131,7 @@ class _CameraPageState extends State<CameraPage> {
     LocationSettings locationoptions;
     locationoptions = AndroidSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 0,
+      distanceFilter: 10,
       intervalDuration: const Duration(seconds: 1),
       //(Optional) Set foreground notification config to keep the app alive
       //when going to the background
@@ -347,16 +347,18 @@ class _CameraPageState extends State<CameraPage> {
       setState(() => _isRecording = false);
       final XFile? vidFile = await _cameraController.stopVideoRecording();
       //move to same folder from cache and delete
-      File videoFile = File(vidFile!.path);
-      await videoFile.copy(
+      File cacheVideoFile = File(vidFile!.path);
+      await cacheVideoFile.copy(
         '$videoCsvFolderPath/$videoFileName.mp4',
       );
+      XFile newVideoFile = XFile('$videoCsvFolderPath/$videoFileName.mp4');
+
       //delete from cache
-      // await videoFile.delete();
+      await cacheVideoFile.delete();
       //
       // mytimer?.cancel();
       await gpsCurrPosStream?.cancel();  //cancelling gps stream once recording gets stop.
-      await uploadVideoToServer(vidFile); // upload video to server
+      await uploadVideoToServer(newVideoFile); // upload video to server
       await uploadCsvToServer(csvPath!); // upload csv file to server
 
       //navigating to preview
@@ -369,19 +371,21 @@ class _CameraPageState extends State<CameraPage> {
 
     } else {
       // file =  await _localFile;
+      print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'+name.toString()+ ';;;;;;;;;;;'+ description.toString() );
+      await _cameraController.prepareForVideoRecording();
+      await _cameraController.startVideoRecording();
+      setState(() => _isRecording = true);
       setState(() {
+        if(name==null || name?.length==0){
+          name = "Welcome";
+        }
         var dt = DateTime.now();
         csvFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
         videoFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
         folderName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
-      });
-      print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'+name.toString()+ ';;;;;;;;;;;'+ description.toString() );
-      await _cameraController.prepareForVideoRecording();
-      await _cameraController.startVideoRecording();
+      }); //assigning unique file name on every start recording key is pressed.
       await gettoken();
       await getprojectid();
-      setState(() => _isRecording = true);
-      //assigning unique file name on every start recording key is pressed.
       await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long)
 
 
