@@ -1,23 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:untitled/camera_page.dart';
-//
-// void main() {
-//   runApp(const MyApp());
-// }
-//
-// class MyApp extends StatelessWidget {
-//   const MyApp({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return const MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: CameraPage(),
-//     );
-//   }
-// }
-
-
+// @dart=2.9
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -29,7 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -54,7 +35,7 @@ class MyApp extends StatelessWidget {
 
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key key,  this.title}) : super(key: key);
   final String title;
 
   @override
@@ -77,24 +58,24 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Container(
         decoration: const BoxDecoration(
-        image: DecorationImage(
-        image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
-    ),
-    child: Scaffold(
-    backgroundColor: Colors.transparent,
-    body: Stack(children: [
-    Container(
-      padding: const EdgeInsets.only(left: 25, top: 80),
-      child: const Text(
-        'RealTime - JourneyRecorder',
+          image: DecorationImage(
+              image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
+        ),
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(children: [
+              Container(
+                padding: const EdgeInsets.only(left: 25, top: 80),
+                child: const Text(
+                  'RealTime - JourneyRecorder',
 
-        style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
+                  style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
 
-      ),
-    )
-    ],
-    )
-    )
+                ),
+              )
+            ],
+            )
+        )
     );
   }
 }
@@ -232,7 +213,7 @@ class SecondScreen extends StatelessWidget {
 
 //second page
 class SecondRoute extends StatelessWidget {
-  const SecondRoute({Key? key}) : super(key: key);
+  const SecondRoute({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +284,7 @@ class SecondRoute extends StatelessWidget {
 
 // Start New Recording Page.
 class ThirdRoute extends StatelessWidget {
-  const ThirdRoute({Key? key}) : super(key: key);
+  const ThirdRoute({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
