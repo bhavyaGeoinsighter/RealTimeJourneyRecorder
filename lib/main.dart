@@ -18,6 +18,8 @@
 // }
 
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled/camera_page.dart';
@@ -60,6 +62,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 3),
+            ()=>Navigator.pushReplacement(context,
+            MaterialPageRoute(builder:
+                (context) =>
+                SecondScreen()
+            )
+        )
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: const BoxDe coration(
+        image: DecorationImage(
+        image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
+    ),
+    child: Scaffold(
+    backgroundColor: Colors.transparent,
+    body: Stack(children: [
+    Container(
+      padding: const EdgeInsets.only(left: 25, top: 80),
+      child: const Text(
+        'RealTime - JourneyRecorder',
+
+        style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
+
+      ),
+    )
+    ],
+    )
+    )
+    );
+  }
+}
+class SecondScreen extends StatelessWidget {
+
 
   TextEditingController name = TextEditingController();
   TextEditingController desciption = TextEditingController();
@@ -69,26 +109,28 @@ class _MyHomePageState extends State<MyHomePage> {
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-            image: AssetImage('assets/images/login.png'), fit: BoxFit.cover),
+            image: AssetImage('assets/train1.jpg'), fit: BoxFit.cover,opacity: 0.9),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(children: [
-          Container(
-            padding: const EdgeInsets.only(left: 35, top: 80),
-            child: const Text(
-              "RealTime- JourneyRecorder",
-              style: TextStyle(color: Colors.white, fontSize: 40),
-            )
-            ,
-
-          ),
+          // Container(
+          //   padding: const EdgeInsets.only(left: 25, top: 80),
+          //   child: const Text(
+          //     'RealTime - JourneyRecorder',
+          //
+          //     style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
+          //
+          //   )
+          //   ,
+          //
+          // ),
           SingleChildScrollView(
             child: Container(
               padding: EdgeInsets.only(
                   right: 35,
                   left: 35,
-                  top: MediaQuery.of(context).size.height * 0.5),
+                  top: MediaQuery.of(context).size.height * 0.6),
               child: Column(children: [
                 TextField(
                   controller: name,
@@ -106,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 TextField(
                   controller: desciption,
-                  obscureText: true,
+                  // obscureText: true,
                   decoration: InputDecoration(
                     fillColor: Colors.grey.shade100,
                     filled: true,
@@ -117,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 const SizedBox(
-                  height: 40,
+                  height: 50,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -125,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     const Text(
                       'Start a Journey',
                       style: TextStyle(
-                        color: Color(0xff4c505b),
+                        color: Colors.grey,
                         fontSize: 27,
                         fontWeight: FontWeight.w700,
                       ),
@@ -140,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           String desctextToSend = desciption.text;
 
 
-                          Navigator.push(context,CupertinoPageRoute(builder: (context) => const CameraPage()));
+                          Navigator.push(context,CupertinoPageRoute(builder: (context) =>  CameraPage(name: nametextToSend, description: desctextToSend,)));
                         },
                         icon: const Icon(Icons.arrow_forward),
                       ),
@@ -304,7 +346,7 @@ class ThirdRoute extends StatelessWidget {
                 child: const Text('Start New Recording!'),
                 onPressed: () {
                   // Navigator.pop(context);
-                  Navigator.push(context,CupertinoPageRoute(builder: (context) => const CameraPage()));
+                  // Navigator.push(context,CupertinoPageRoute(builder: (context) => const CameraPage()));
                 },
               )
             ],
