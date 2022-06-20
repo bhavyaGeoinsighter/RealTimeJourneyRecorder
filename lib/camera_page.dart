@@ -125,14 +125,14 @@ class _CameraPageState extends State<CameraPage> {
     }
 
     // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
+    // continue accessing t
+    // he position of the device.
     // LocationSettings locationOptions = const LocationSettings(accuracy: LocationAccuracy.best,distanceFilter: 0);
 
     LocationSettings locationoptions;
     locationoptions = AndroidSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
-      intervalDuration: const Duration(seconds: 1),
+      distanceFilter: 1,
       //(Optional) Set foreground notification config to keep the app alive
       //when going to the background
 
