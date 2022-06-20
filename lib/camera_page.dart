@@ -368,6 +368,7 @@ class _CameraPageState extends State<CameraPage> {
       // );
       //
       //  Navigator.push(context, route);
+      Navigator.pop(context);
 
     } else {
       // file =  await _localFile;
