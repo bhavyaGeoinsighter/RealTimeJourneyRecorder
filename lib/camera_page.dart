@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+// import 'dart:html';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:location/location.dart';
 import 'package:untitled/video_page.dart';
-import 'package:geocoding/geocoding.dart';
+// import 'package:geocoding/geocoding.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+// import 'package:location/location.dart' as loc;
 
 
 class project {
@@ -39,7 +43,9 @@ class _CameraPageState extends State<CameraPage> {
   late CameraController _cameraController;
   String? data;//not used
   Timer? mytimer; //not used
-  StreamSubscription? gpsCurrPosStream;
+  // StreamSubscription? gpsCurrPosStream;
+  StreamSubscription? gpsLocationStream;
+
   int? srtIndex;//not used
 
  late String? name = "${widget.name}";
@@ -81,6 +87,29 @@ class _CameraPageState extends State<CameraPage> {
     setState(() => csvPath ='$videoCsvDirectory/$csvFileName.csv' );
     return File('$videoCsvDirectory/$csvFileName.csv');
   }
+  Future<File> get _localFile2 async {
+    final path = await _localPath;
+    // final String videoCsvDirectory = '$path/$folderName';
+    // await Directory(videoCsvDirectory).create(recursive: true);
+    // setState(() => videoCsvFolderPath =videoCsvDirectory );
+    // setState(() => csvPath ='$videoCsvDirectory/$csvFileName.csv' );
+    return File('$videoCsvFolderPath/forgedtime.csv');
+  }
+  _gpsforged() async {
+
+    final file = await _localFile2;
+    var dt = DateTime.now();
+    Position position = await Geolocator.getCurrentPosition();
+    String latitude = position.latitude.toString();
+    String longitude = position.longitude.toString();
+    String currTime = dt.toUtc().toString();
+    String accuracy  = position.accuracy.toString();
+    file.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
+
+
+
+
+  }
 
 //Reading file (Not Needed Now)
   Future<String> readContent() async {
@@ -95,72 +124,114 @@ class _CameraPageState extends State<CameraPage> {
       return 'Error!';
     }
   }
+  Location location = new Location();
 
+  _gpsLocation() async {
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    LocationData _locationData;
 
-
-
-// Getting permission for gps, checking for GPS, Getting latitude & longitude
-  _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.DENIED) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.GRANTED) {
+        return;
+      }
     }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing t
-    // he position of the device.
-    // LocationSettings locationOptions = const LocationSettings(accuracy: LocationAccuracy.best,distanceFilter: 0);
-
-    LocationSettings locationoptions;
-    locationoptions = AndroidSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 1,
-      //(Optional) Set foreground notification config to keep the app alive
-      //when going to the background
-
-    );
-
-    //Make the csv file and then write while listening for the gps co-ordinates.
     final csvFile =  await _localFile;
-    gpsCurrPosStream = Geolocator.getPositionStream(locationSettings: locationoptions).listen((position) async{
+
+    LocationData locationData;
+    // _locationData = await location.getLocation();
+    await location.changeSettings(interval: 0);
+    gpsLocationStream = location.onLocationChanged().listen((LocationData currentLocation) {
       var dt = DateTime.now();
-      String latitude = position.latitude.toString();
-      String longitude = position.longitude.toString();
+      String latitude = currentLocation.latitude.toString();
+      String longitude = currentLocation.longitude.toString();
       String currTime = dt.toUtc().toString();
-      String accuracy = position.accuracy.toString();
+      String accuracy = currentLocation.accuracy.toString();
       // String? timestamp = position.timestamp?.toUtc().toString();
-      String altitude = position.altitude.toString();
-      String speed = position.speed.toString();
-      String speedAcurracy = position.speedAccuracy.toString();
-      csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy,$altitude,$speed,$speedAcurracy\n',mode: FileMode.append);
-      // print('---------------------------GPS($latitude $longitude),$currTime \n');
+      // String altitude = position.altitude.toString();
+      // String speed = position.speed.toString();
+      // String speedAcurracy = position.speedAccuracy.toString();
+      csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
+
+
+
+
     });
   }
 
+//
+// // Getting permission for gps, checking for GPS, Getting latitude & longitude
+//   _determinePosition() async {
+//     bool serviceEnabled;
+//     LocationPermission permission;
+//
+//     // Test if location services are enabled.
+//     serviceEnabled = await Geolocator.isLocationServiceEnabled();
+//     if (!serviceEnabled) {
+//       return Future.error('Location services are disabled.');
+//     }
+//
+//     permission = await Geolocator.checkPermission();
+//     if (permission == LocationPermission.denied) {
+//       permission = await Geolocator.requestPermission();
+//       if (permission == LocationPermission.denied) {
+//         return Future.error('Location permissions are denied');
+//       }
+//     }
+//
+//     if (permission == LocationPermission.deniedForever) {
+//       // Permissions are denied forever, handle appropriately.
+//       return Future.error(
+//           'Location permissions are permanently denied, we cannot request permissions.');
+//     }
+//
+//     // When we reach here, permissions are granted and we can
+//     // continue accessing t
+//     // he position of the device.
+//     LocationSettings locationOptions = const LocationSettings(accuracy: LocationAccuracy.best,distanceFilter: 0);
+//
+//     // LocationSettings locationoptions;
+//     // locationoptions = AndroidSettings(
+//     //   accuracy: LocationAccuracy.high,
+//     //   distanceFilter: 1,
+//     //   //(Optional) Set foreground notification config to keep the app alive
+//     //   //when going to the background
+//     //
+//     // );
+//
+//     //Make the csv file and then write while listening for the gps co-ordinates.
+//     final csvFile =  await _localFile;
+//     gpsCurrPosStream = Geolocator.getPositionStream().listen((position) async{
+//       var dt = DateTime.now();
+//       String latitude = position.latitude.toString();
+//       String longitude = position.longitude.toString();
+//       String currTime = dt.toUtc().toString();
+//       String accuracy = position.accuracy.toString();
+//       // String? timestamp = position.timestamp?.toUtc().toString();
+//       // String altitude = position.altitude.toString();
+//       // String speed = position.speed.toString();
+//       // String speedAcurracy = position.speedAccuracy.toString();
+//       csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
+//       // print('---------------------------GPS($latitude $longitude),$currTime \n');
+//     });
+//   }
 
-//Getting the address (Not used now)
-  Future<void> GetAddressFromLatLong(Position position) async{
-    List<Placemark> placemark = await placemarkFromCoordinates(position.latitude, position.longitude);
-    print(placemark);
-  }
+
+// //Getting the address (Not used now)
+//   Future<void> GetAddressFromLatLong(Position position) async{
+//     List<Placemark> placemark = await placemarkFromCoordinates(position.latitude, position.longitude);
+//     print(placemark);
+//   }
 
 
   //Get token (API call :- 1)
@@ -356,10 +427,11 @@ class _CameraPageState extends State<CameraPage> {
       //delete from cache
       await cacheVideoFile.delete();
       //
+      // await gpsCurrPosStream?.cancel();  //cancelling gps stream once recording gets stop.
+      gpsLocationStream?.cancel();
       // mytimer?.cancel();
-      await gpsCurrPosStream?.cancel();  //cancelling gps stream once recording gets stop.
-      await uploadVideoToServer(newVideoFile); // upload video to server
-      await uploadCsvToServer(csvPath!); // upload csv file to server
+      // await uploadVideoToServer(newVideoFile); // upload video to server
+      // await uploadCsvToServer(csvPath!); // upload csv file to server
 
       //navigating to preview
       // final route = MaterialPageRoute(
@@ -385,9 +457,11 @@ class _CameraPageState extends State<CameraPage> {
         videoFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
         folderName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
       }); //assigning unique file name on every start recording key is pressed.
+      // await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long)
+      // mytimer = await Timer.periodic(Duration(seconds: 1), (Timer t) => _gpsforged());
+      await _gpsLocation();
       await gettoken();
       await getprojectid();
-      await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long)
 
 
 

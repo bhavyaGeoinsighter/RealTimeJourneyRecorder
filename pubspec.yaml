@@ -40,6 +40,7 @@ dependencies:
   geocoding:
   intl:
   fluttertoast:
+  location:
 
 
   #  geocoding: ^1.0.5
