@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:location/location.dart';
 import 'package:untitled/video_page.dart';
@@ -14,7 +15,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 // import 'package:location/location.dart' as loc;
 
-
+//Not needed
 class project {
   final int projectName;
   final String type;
@@ -28,6 +29,8 @@ class project {
     );
   }
 }
+
+
 class CameraPage extends StatefulWidget {
   final String? name;
   final String? description;
@@ -41,14 +44,17 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   bool _isLoading = true;
   late CameraController _cameraController;
+  bool _isCameraInitialized = false;
+
   String? data;//not used
   Timer? mytimer; //not used
-  // StreamSubscription? gpsCurrPosStream;
-  StreamSubscription? gpsLocationStream;
+  // StreamSubscription? gpsCurrPosStream;// Geolocator plugin
+
+  StreamSubscription? gpsLocationStream; //Location plugin used
 
   int? srtIndex;//not used
 
- late String? name = "${widget.name}";
+  late String? name = "${widget.name}";
   late String? description = "${widget.description}";
 
   //Folder structure :- csv,video
@@ -65,6 +71,7 @@ class _CameraPageState extends State<CameraPage> {
   String? token;
 
 
+  bool isFlashModeOn = true;
   @override
   void initState() {
     super.initState();
@@ -87,6 +94,7 @@ class _CameraPageState extends State<CameraPage> {
     setState(() => csvPath ='$videoCsvDirectory/$csvFileName.csv' );
     return File('$videoCsvDirectory/$csvFileName.csv');
   }
+
   Future<File> get _localFile2 async {
     final path = await _localPath;
     // final String videoCsvDirectory = '$path/$folderName';
@@ -95,6 +103,7 @@ class _CameraPageState extends State<CameraPage> {
     // setState(() => csvPath ='$videoCsvDirectory/$csvFileName.csv' );
     return File('$videoCsvFolderPath/forgedtime.csv');
   }
+
   _gpsforged() async {
 
     final file = await _localFile2;
@@ -106,10 +115,8 @@ class _CameraPageState extends State<CameraPage> {
     String accuracy  = position.accuracy.toString();
     file.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
 
-
-
-
   }
+
 
 //Reading file (Not Needed Now)
   Future<String> readContent() async {
@@ -124,6 +131,9 @@ class _CameraPageState extends State<CameraPage> {
       return 'Error!';
     }
   }
+
+
+  //Location Plugin
   Location location = new Location();
 
   _gpsLocation() async {
@@ -169,7 +179,7 @@ class _CameraPageState extends State<CameraPage> {
     });
   }
 
-//
+//GeoLocator Plugin
 // // Getting permission for gps, checking for GPS, Getting latitude & longitude
 //   _determinePosition() async {
 //     bool serviceEnabled;
@@ -353,8 +363,6 @@ class _CameraPageState extends State<CameraPage> {
   void dispose() {
     _cameraController.dispose();
     super.dispose();
-
-    // _determinePosition();
   }
 
 
@@ -382,6 +390,15 @@ class _CameraPageState extends State<CameraPage> {
                 onPressed: () => _recordVideo(),
               ),
             ),
+            Padding(padding: const EdgeInsets.all(100),
+            child : FloatingActionButton(
+              backgroundColor: Colors.red,child: Icon( isFlashModeOn ? Icons.flash_off : Icons.flash_on ), onPressed: () {
+                _Flash();
+                },
+            ),
+            ),
+
+
           ],
         ),
       );
@@ -389,10 +406,69 @@ class _CameraPageState extends State<CameraPage> {
   }
 
 
+  _Flash()  async{
+    if(isFlashModeOn){
+      _cameraController.setFlashMode(FlashMode.torch);
+      setState(() => isFlashModeOn = false);
+
+      // isFlashModeOn = false;
+    }
+    else{
+      _cameraController.setFlashMode(FlashMode.off);
+      setState(() => isFlashModeOn = true);
+    }
+}
+
+
+
+  void onNewCameraSelected(CameraDescription cameraDescription) async {
+    final previousCameraController = _cameraController;
+    // Instantiating the camera controller
+    final CameraController cameraController = CameraController(
+      cameraDescription,
+      ResolutionPreset.high,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
+
+    // Dispose the previous controller
+    await previousCameraController.dispose();
+
+    // Replace with the new controller
+    if (mounted) {
+      setState(() {
+        _cameraController = cameraController;
+      });
+    }
+
+    // Update UI if controller updated
+    cameraController.addListener(() {
+      if (mounted) setState(() {});
+    });
+
+    // Initialize controller
+    try {
+      await cameraController.initialize();
+    } on CameraException catch (e) {
+      print('Error initializing camera: $e');
+    }
+
+    // Update the Boolean
+    if (mounted) {
+      setState(() {
+        _isCameraInitialized = _cameraController.value.isInitialized;
+      });
+    }
+  }
+
+
+
+
+
   _initCamera() async {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []); //hiding device status bar which is visible on top
     final cameras = await availableCameras();
     final front = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.back);
-    _cameraController = CameraController(front, ResolutionPreset.high);
+    _cameraController = CameraController(cameras[0], ResolutionPreset.high);
     await _cameraController.initialize();
     setState(() => _isLoading = false);
   }
@@ -431,7 +507,7 @@ class _CameraPageState extends State<CameraPage> {
       gpsLocationStream?.cancel();
       // mytimer?.cancel();
       // await uploadVideoToServer(newVideoFile); // upload video to server
-      // await uploadCsvToServer(csvPath!); // upload csv file to server
+      await uploadCsvToServer(csvPath!); // upload csv file to server
 
       //navigating to preview
       // final route = MaterialPageRoute(
@@ -457,9 +533,9 @@ class _CameraPageState extends State<CameraPage> {
         videoFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
         folderName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
       }); //assigning unique file name on every start recording key is pressed.
-      // await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long)
+      // await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long) // Geolocator plugin
       // mytimer = await Timer.periodic(Duration(seconds: 1), (Timer t) => _gpsforged());
-      await _gpsLocation();
+      await _gpsLocation(); //Location plugin used
       await gettoken();
       await getprojectid();
 
