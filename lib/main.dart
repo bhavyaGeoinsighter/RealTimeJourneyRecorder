@@ -3,9 +3,20 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:untitled/camera_page.dart';
+import 'package:untitled/todo_model.dart';
+import 'package:untitled/view_files.dart';
+const String todoBoxName = "todo1";
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final document = await getApplicationDocumentsDirectory();
+  Hive.init(document.path);
+  Hive.registerAdapter(TodoModelAdapter());
+  await Hive.openBox<TodoModel>(todoBoxName);
+
   runApp(const MyApp());
 }
 
@@ -166,6 +177,19 @@ class SecondScreen extends StatelessWidget {
                           Navigator.push(context,CupertinoPageRoute(builder: (context) =>  CameraPage(name: nametextToSend, description: desctextToSend,)));
                         },
                         icon: const Icon(Icons.arrow_forward),
+                      ),
+                    ),
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: const Color(0xff4c505b),
+                      child: IconButton(
+                        color: Colors.white,
+                        onPressed: () {
+
+
+                          Navigator.push(context,CupertinoPageRoute(builder: (context) => const Database()));
+                        },
+                        icon: const Icon(Icons.access_alarm_outlined),
                       ),
                     ),
                   ],

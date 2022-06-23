@@ -6,13 +6,17 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:location/location.dart';
+import 'package:untitled/todo_model.dart';
 import 'package:untitled/video_page.dart';
 // import 'package:geocoding/geocoding.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+
+import 'main.dart';
 // import 'package:location/location.dart' as loc;
 
 //Not needed
@@ -72,9 +76,12 @@ class _CameraPageState extends State<CameraPage> {
 
 
   bool isFlashModeOn = true;
+  late Box<TodoModel> todoBox;
+
   @override
   void initState() {
     super.initState();
+    todoBox = Hive.box<TodoModel>(todoBoxName);
     _initCamera();
   }
 
@@ -498,6 +505,9 @@ class _CameraPageState extends State<CameraPage> {
       await cacheVideoFile.copy(
         '$videoCsvFolderPath/$videoFileName.mp4',
       );
+      TodoModel todo = TodoModel(id: 1.toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: videoPath.toString(),createdOn: csvFileName.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
+      //
+      todoBox.add(todo);
       XFile newVideoFile = XFile('$videoCsvFolderPath/$videoFileName.mp4');
 
       //delete from cache
@@ -507,7 +517,7 @@ class _CameraPageState extends State<CameraPage> {
       gpsLocationStream?.cancel();
       // mytimer?.cancel();
       // await uploadVideoToServer(newVideoFile); // upload video to server
-      await uploadCsvToServer(csvPath!); // upload csv file to server
+      // await uploadCsvToServer(csvPath!); // upload csv file to server
 
       //navigating to preview
       // final route = MaterialPageRoute(
