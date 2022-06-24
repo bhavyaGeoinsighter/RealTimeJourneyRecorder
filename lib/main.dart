@@ -146,19 +146,13 @@ class SecondScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Row( children: [
                   Padding(
                     padding: const EdgeInsets.all(18.0),
-                    child: Row(
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        const Text(
-                          'Start a Journey',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: const Color(0xff4c505b),
@@ -174,22 +168,22 @@ class SecondScreen extends StatelessWidget {
                             icon: const Icon(Icons.arrow_forward),
                           ),
                         ),
+                        const Text(
+                          'Start a Journey',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight:FontWeight.w600,
+                          ),
+                        ),
 
                       ],
                     ),
                   ),
 
-                  Row(
+                  Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        const Text(
-                          'View Recordings',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: const Color(0xff4c505b),
@@ -201,6 +195,13 @@ class SecondScreen extends StatelessWidget {
                               Navigator.push(context,CupertinoPageRoute(builder: (context) => const Database()));
                             },
                             icon: const Icon(Icons.video_library_outlined),
+                          ),
+                        ),
+                        const Text(
+                          'View Recordings',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
 
@@ -229,6 +230,7 @@ class SecondScreen extends StatelessWidget {
                         //   ),
                         // ),
                       ]),
+                  ]),
                 ]),
               ),
             ),
