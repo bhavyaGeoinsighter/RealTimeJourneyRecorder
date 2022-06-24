@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:untitled/camera_page.dart';
 import 'package:untitled/todo_model.dart';
 import 'package:untitled/view_files.dart';
-const String todoBoxName = "todo1";
+const String todoBoxName = "todo3";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,11 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: {
-        // '/': (context) => HomeRoute(),
-        '/second': (context) => const SecondRoute(),
-        '/third': (context) => const ThirdRoute(),
-      },
+
       title: 'Flutter Demo',
       theme: ThemeData(
         backgroundColor: Colors.pink,
@@ -76,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.transparent,
             body: Stack(children: [
               Container(
-                padding: const EdgeInsets.only(left: 25, top: 80),
                 child: const Text(
                   'RealTime - JourneyRecorder',
 
@@ -105,127 +100,137 @@ class SecondScreen extends StatelessWidget {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Stack(children: [
-          // Container(
-          //   padding: const EdgeInsets.only(left: 25, top: 80),
-          //   child: const Text(
-          //     'RealTime - JourneyRecorder',
-          //
-          //     style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
-          //
-          //   )
-          //   ,
-          //
-          // ),
+        body: Column(children: [
+          Expanded(
+            child: Center(
+              child: Container(
+                child: const Text(
+                  'Rail Insighter',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800)
+
+                )
+                ,
+
+              ),
+            ),
+          ),
           SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.only(
-                  right: 35,
-                  left: 35,
-                  top: MediaQuery.of(context).size.height * 0.6),
-              child: Column(children: [
-                TextField(
-                  controller: name,
-                  decoration: InputDecoration(
-                    fillColor: Colors.grey.shade100,
-                    filled: true,
-                    hintText: 'Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Container(
+                child: Column(children: [
+                  TextField(
+                    controller: name,
+                    decoration: InputDecoration(
+                      fillColor: Colors.grey.shade100,
+                      filled: true,
+                      hintText: 'Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                TextField(
-                  controller: desciption,
-                  // obscureText: true,
-                  decoration: InputDecoration(
-                    fillColor: Colors.grey.shade100,
-                    filled: true,
-                    hintText: 'Description',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  Container(
+                    height: 10,
+                  ),
+                  TextField(
+                    controller: desciption,
+                    // obscureText: true,
+                    decoration: InputDecoration(
+                      fillColor: Colors.grey.shade100,
+                      filled: true,
+                      hintText: 'Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Start a Journey',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 27,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: const Color(0xff4c505b),
-                      child: IconButton(
-                        color: Colors.white,
-                        onPressed: () {
-                          String nametextToSend = name.text;
-                          String desctextToSend = desciption.text;
-
-
-                          Navigator.push(context,CupertinoPageRoute(builder: (context) =>  CameraPage(name: nametextToSend, description: desctextToSend,)));
-                        },
-                        icon: const Icon(Icons.arrow_forward),
-                      ),
-                    ),
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: const Color(0xff4c505b),
-                      child: IconButton(
-                        color: Colors.white,
-                        onPressed: () {
-
-
-                          Navigator.push(context,CupertinoPageRoute(builder: (context) => const Database()));
-                        },
-                        icon: const Icon(Icons.access_alarm_outlined),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 40,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, 'register');
-                        },
-                        child: const Text(
-                          '',//sign up
+                  Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Text(
+                          'Start a Journey',
                           style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontSize: 18,
-                            color: Color(0xff4c505b),
+                            color: Colors.grey,
+                            fontSize: 27,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          '',//forgot password
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontSize: 18,
-                            color: Color(0xff4c505b),
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: const Color(0xff4c505b),
+                          child: IconButton(
+                            color: Colors.white,
+                            onPressed: () {
+                              String nametextToSend = name.text;
+                              String desctextToSend = desciption.text;
+
+
+                              Navigator.push(context,CupertinoPageRoute(builder: (context) =>  CameraPage(name: nametextToSend, description: desctextToSend,)));
+                            },
+                            icon: const Icon(Icons.arrow_forward),
                           ),
                         ),
-                      ),
-                    ]),
-              ]),
+
+                      ],
+                    ),
+                  ),
+
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Text(
+                          'View Recordings',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 27,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: const Color(0xff4c505b),
+                          child: IconButton(
+                            color: Colors.white,
+                            onPressed: () {
+
+
+                              Navigator.push(context,CupertinoPageRoute(builder: (context) => const Database()));
+                            },
+                            icon: const Icon(Icons.video_library_outlined),
+                          ),
+                        ),
+
+                        // TextButton(
+                        //   onPressed: () {
+                        //     Navigator.pushNamed(context, 'register');
+                        //   },
+                        //   child: const Text(
+                        //     '',//sign up
+                        //     style: TextStyle(
+                        //       decoration: TextDecoration.underline,
+                        //       fontSize: 18,
+                        //       color: Color(0xff4c505b),
+                        //     ),
+                        //   ),
+                        // ),
+                        // TextButton(
+                        //   onPressed: () {},
+                        //   child: const Text(
+                        //     '',//forgot password
+                        //     style: TextStyle(
+                        //       decoration: TextDecoration.underline,
+                        //       fontSize: 18,
+                        //       color: Color(0xff4c505b),
+                        //     ),
+                        //   ),
+                        // ),
+                      ]),
+                ]),
+              ),
             ),
           ),
         ]),
@@ -234,137 +239,3 @@ class SecondScreen extends StatelessWidget {
   }
 }
 
-
-//second page
-class SecondRoute extends StatelessWidget {
-  const SecondRoute({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Second Page"),
-        backgroundColor: Colors.green,
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/third');
-          },
-          child: const Text('Third page!'),
-        ),
-
-      ),
-      drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text('Home'),
-            ),
-            ListTile(
-              title: const Text('Old Recordings'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('New Recordings'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('About'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
-// Start New Recording Page.
-class ThirdRoute extends StatelessWidget {
-  const ThirdRoute({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Third Page"),
-        backgroundColor: Colors.green,
-      ),
-      body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter your name',
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Enter description',
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                child: const Text('Back!'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-
-
-              ),
-              ElevatedButton(
-                child: const Text('Start New Recording!'),
-                onPressed: () {
-                  // Navigator.pop(context);
-                  // Navigator.push(context,CupertinoPageRoute(builder: (context) => const CameraPage()));
-                },
-              )
-            ],
-          )
-
-      ),
-    );
-  }
-}
-
-// child: ElevatedButton(
-// child: const Text('Back!'),
-// onPressed: () {
-// Navigator.pop(context);
-// },
-// ),

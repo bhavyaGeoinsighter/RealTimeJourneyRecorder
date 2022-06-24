@@ -43,6 +43,7 @@ dependencies:
   location:
   hive:
   hive_flutter:
+  flutter_slidable:
 #  hive_generator:
 #  build_runner:
 

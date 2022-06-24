@@ -102,6 +102,8 @@ class _CameraPageState extends State<CameraPage> {
     return File('$videoCsvDirectory/$csvFileName.csv');
   }
 
+
+  //Not used (Testing purpose forged file)
   Future<File> get _localFile2 async {
     final path = await _localPath;
     // final String videoCsvDirectory = '$path/$folderName';
@@ -111,6 +113,7 @@ class _CameraPageState extends State<CameraPage> {
     return File('$videoCsvFolderPath/forgedtime.csv');
   }
 
+  // Not used (Testing purpose forged with timer)
   _gpsforged() async {
 
     final file = await _localFile2;
@@ -242,8 +245,6 @@ class _CameraPageState extends State<CameraPage> {
 //       // print('---------------------------GPS($latitude $longitude),$currTime \n');
 //     });
 //   }
-
-
 // //Getting the address (Not used now)
 //   Future<void> GetAddressFromLatLong(Position position) async{
 //     List<Placemark> placemark = await placemarkFromCoordinates(position.latitude, position.longitude);
@@ -265,7 +266,6 @@ class _CameraPageState extends State<CameraPage> {
     // );
     // print('--------------------------------------'+ projectid.toString());
     // print('--------------------------------------'+ body.toString());
-
     if (response.statusCode == 200) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
@@ -505,9 +505,10 @@ class _CameraPageState extends State<CameraPage> {
       await cacheVideoFile.copy(
         '$videoCsvFolderPath/$videoFileName.mp4',
       );
-      TodoModel todo = TodoModel(id: 1.toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: videoPath.toString(),createdOn: csvFileName.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
-      //
+      TodoModel todo = TodoModel(id: 1.toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: '$videoCsvFolderPath/$videoFileName.mp4',createdOn: csvFileName.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
+      // Adding to the database.
       todoBox.add(todo);
+      //
       XFile newVideoFile = XFile('$videoCsvFolderPath/$videoFileName.mp4');
 
       //delete from cache
