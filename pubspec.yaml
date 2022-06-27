@@ -45,7 +45,8 @@ dependencies:
   hive_flutter:
   flutter_slidable:
   expansion_tile_card:
-#  hive_generator:
+  shared_preferences:
+  #  hive_generator:
 #  build_runner:
 
 

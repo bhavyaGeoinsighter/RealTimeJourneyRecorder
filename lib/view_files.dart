@@ -1,5 +1,6 @@
 // import 'dart:js_util/js_util_wasm.dart';
 
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:expansion_tile_card/expansion_tile_card.dart';
@@ -10,7 +11,13 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:untitled/todo_model.dart';
+import 'package:untitled/token_model.dart';
 import 'package:untitled/video_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
+
 
 import 'main.dart';
 
@@ -27,6 +34,12 @@ class _MyHomePageState extends State<Database> {
   final GlobalKey<ExpansionTileCardState> cardA = new GlobalKey();
 
   late Box<TodoModel> todoBox;
+  late Box<tokenModel> tokenBox;
+
+  //api
+  String? projectid;
+  String? serverIpAddress='http://15.206.73.160:8081/api';
+  String? token;
 
   // final TextEditingController titleController = TextEditingController();
   // final TextEditingController detailController = TextEditingController();
@@ -38,7 +51,122 @@ class _MyHomePageState extends State<Database> {
     // TODO: implement initState
     super.initState();
     todoBox = Hive.box<TodoModel>(todoBoxName);
+    tokenBox = Hive.box<tokenModel>(tokenBoxName);
   }
+  //Get token (API call :- 1)
+  Future<dynamic> gettoken() async {
+    final response = await http.post(
+        Uri.parse('$serverIpAddress/getJwtToken'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        }
+    );
+    final body = json.decode(response.body);
+    // setState(() =>
+    // projectid = body['data']['_id'].toString() //ProjectId
+    // );
+    // print('--------------------------------------'+ projectid.toString());
+    // print('--------------------------------------'+ body.toString());
+    if (response.statusCode == 200) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      print('--------------------------------------token:'+ body['data']['token'].toString());
+      setState(() => token = body['data']['token']);
+
+      // token = body['data']['token'];
+
+      // return project.fromJson(jsonDecode(response.body));
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create album.');
+    }
+  }
+
+
+  //Get Project Id (API call :- 2)
+  Future<dynamic> getprojectid(String name) async {
+    final response = await http.post(
+      Uri.parse('$serverIpAddress/projectCreate'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, String>{
+        'projectName': name.toString(),
+        'type': 'video'
+      }),
+    );
+    final body = json.decode(response.body);
+    // print( '----------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
+    // setState(() => projectid = body['_id']);
+
+    if (response.statusCode == 200) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      setState(() => projectid = body['_id']);
+
+      // return project.fromJson(jsonDecode(response.body));
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create project.');
+    }
+  }
+
+
+
+  // upload video to server (API call:- 3)
+  uploadVideoToServer(String videoPath) async {
+    // String pi = projectid!;
+    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
+    var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/videoForFlutterApp'),);
+    request.headers.addAll(headers);
+    // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
+    request.files.add(await http.MultipartFile.fromPath('video', videoPath,filename: '$projectid' + '_video.mp4',contentType: MediaType('video', 'mp4')));
+
+    // print(':::::::::::::::project id :- '+projectid!);
+    // print('::::::::::::::::::token :- '+token!);
+
+    request.send().then((response) {
+      print(':;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
+      http.Response.fromStream(response).then((onValue) {
+        try {
+          // get your response here...
+        } catch (e) {
+          // handle exeption
+          // print('------------'+e.toString());
+
+        }
+      });
+    });
+  }
+
+
+  //Upload csv file to server (API call :- 4)
+  uploadCsvToServer(String Csvpath) async {
+    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
+    var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/csvForConversionToSrt'),);
+    request.headers.addAll(headers);
+    // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
+    request.files.add(await http.MultipartFile.fromPath('csv', Csvpath,filename: '$projectid' + 'new.csv',contentType: MediaType('application', 'vnd.ms-excel')));
+    request.send().then((response) {
+      print(':;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
+      http.Response.fromStream(response).then((onValue) {
+        try {
+          // get your response here...
+        } catch (e) {
+          // handle exeption
+          print('-------------------------------'+e.toString());
+
+        }
+      });
+    });
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +288,7 @@ class _MyHomePageState extends State<Database> {
                           ),
 
                           children: <Widget>[
-                            Divider(
+                            const Divider(
                               thickness: 1.0,
                               height: 1.0,
                             ),
@@ -199,10 +327,10 @@ class _MyHomePageState extends State<Database> {
                                     Navigator.push(context, route);
                                   },
                                   child: Column(
-                                    children: <Widget>[
+                                    children: const <Widget>[
                                       Icon(Icons.video_collection),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
+                                        padding: EdgeInsets.symmetric(
                                             vertical: 2.0),
                                       ),
                                       Text('Open'),
@@ -217,13 +345,18 @@ class _MyHomePageState extends State<Database> {
                                     // cardA.currentState?.collapse();
                                     // navigating to preview
                                     // await uploadVideoToServer(todo.videoPath); // upload video to server
+                                    // await gettoken();
+                                    // await getprojectid(todo.name);
+                                    // await uploadVideoToServer(todo.videoPath);
+                                    // await uploadCsvToServer(todo.csvPath);
+                                    print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;');
 
                                   },
                                   child: Column(
-                                    children: <Widget>[
+                                    children: const <Widget>[
                                       Icon(Icons.cloud_upload_rounded),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
+                                        padding: EdgeInsets.symmetric(
                                             vertical: 2.0),
                                       ),
                                       Text('Upload Video'),

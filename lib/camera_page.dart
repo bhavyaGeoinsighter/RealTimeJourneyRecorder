@@ -547,8 +547,8 @@ class _CameraPageState extends State<CameraPage> {
       // await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long) // Geolocator plugin
       // mytimer = await Timer.periodic(Duration(seconds: 1), (Timer t) => _gpsforged());
       await _gpsLocation(); //Location plugin used
-      await gettoken();
-      await getprojectid();
+      // await gettoken();
+      // await getprojectid();
 
 
 
