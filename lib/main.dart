@@ -223,7 +223,7 @@ class _LoginDemoState extends State<LoginDemo> {
                       context, MaterialPageRoute(builder: (context) => startJourneyScreen()));
                 },
 
-                child: Text(
+                child: const Text(
                   'Login',
                   style: TextStyle(color: Colors.white, fontSize: 25),
                 ),
@@ -236,8 +236,8 @@ class _LoginDemoState extends State<LoginDemo> {
             FlatButton(
               onPressed: (){
                 //TODO skip
-                print('token at login page:- '+tokenBox.get('token').token.toString()+'----------------------------------');
 
+                print('token at login page:- ${tokenBox.length}----------------------------------');
                 Navigator.push(
                     context, MaterialPageRoute(builder: (context) => startJourneyScreen()));
               },

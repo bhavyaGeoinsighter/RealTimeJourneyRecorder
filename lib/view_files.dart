@@ -2,12 +2,10 @@
 
 import 'dart:convert';
 import 'dart:ffi';
-
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive/hive.dart';
-// import 'package:hivetodoteach/todo_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:untitled/todo_model.dart';
@@ -41,9 +39,6 @@ class _MyHomePageState extends State<Database> {
   String? serverIpAddress='http://15.206.73.160:8081/api';
   String? token;
 
-  // final TextEditingController titleController = TextEditingController();
-  // final TextEditingController detailController = TextEditingController();
-
   TodoFilter filter = TodoFilter.ALL;
 
   @override
@@ -52,40 +47,12 @@ class _MyHomePageState extends State<Database> {
     super.initState();
     todoBox = Hive.box<TodoModel>(todoBoxName);
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
+    setState(() => token = tokenBox.get('token')?.token);
+
   }
-  //Get token (API call :- 1)
-  Future<dynamic> gettoken() async {
-    final response = await http.post(
-        Uri.parse('$serverIpAddress/getJwtToken'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        }
-    );
-    final body = json.decode(response.body);
-    // setState(() =>
-    // projectid = body['data']['_id'].toString() //ProjectId
-    // );
-    // print('--------------------------------------'+ projectid.toString());
-    // print('--------------------------------------'+ body.toString());
-    if (response.statusCode == 200) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
-      print('--------------------------------------token:'+ body['data']['token'].toString());
-      setState(() => token = body['data']['token']);
-
-      // token = body['data']['token'];
-
-      // return project.fromJson(jsonDecode(response.body));
-    } else {
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
-      throw Exception('Failed to create album.');
-    }
-  }
-
 
   //Get Project Id (API call :- 2)
-  Future<dynamic> getprojectid(String name) async {
+  Future<dynamic> getprojectid(String name, TodoModel todo) async {
     final response = await http.post(
       Uri.parse('$serverIpAddress/projectCreate'),
       headers: <String, String>{
@@ -98,7 +65,7 @@ class _MyHomePageState extends State<Database> {
       }),
     );
     final body = json.decode(response.body);
-    // print( '----------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
+    print( '----------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
     // setState(() => projectid = body['_id']);
 
     if (response.statusCode == 200) {
@@ -117,7 +84,7 @@ class _MyHomePageState extends State<Database> {
 
 
   // upload video to server (API call:- 3)
-  uploadVideoToServer(String videoPath) async {
+  uploadVideoToServer(String videoPath,TodoModel todo) async {
     // String pi = projectid!;
     Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
     var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/videoForFlutterApp'),);
@@ -173,7 +140,7 @@ class _MyHomePageState extends State<Database> {
     return Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("All Recordings"),
+          title: const Text("All Recordings"),
           backgroundColor: Colors.black,
           actions: <Widget>[
             PopupMenuButton<String>(
@@ -184,18 +151,30 @@ class _MyHomePageState extends State<Database> {
                   setState(() {
                     filter = TodoFilter.ALL;
                   });
-                } else if (value.compareTo("Compeleted") == 0) {
+                }
+                else if (value.compareTo("Compeleted") == 0) {
                   setState(() {
                     filter = TodoFilter.COMPLETED;
                   });
-                } else {
+                }
+                // Logout
+                else if (value.compareTo("Logout") == 0) {
+                  setState(() {
+                    // filter = TodoFilter.COMPLETED;
+                    tokenModel tm = tokenModel(token: "");
+                    tokenBox.put('token', tm);
+                    print('token after logout:- ${tokenBox.get('token')?.token}----------------------------------');
+
+                  });
+                }
+                else {
                   setState(() {
                     filter = TodoFilter.INCOMPLETED;
                   });
                 }
               },
               itemBuilder: (BuildContext context) {
-                return ["All", "Uploaded", "Not Uploaded", "Others"]
+                return ["All", "Uploaded", "Not Uploaded", "Logout"]
                     .map((option) {
                   return PopupMenuItem(
                     value: option,
@@ -213,7 +192,8 @@ class _MyHomePageState extends State<Database> {
 
             if (filter == TodoFilter.ALL) {
               keys = todos.keys.cast<int>().toList();
-            } else if (filter == TodoFilter.COMPLETED) {
+            }
+            else if (filter == TodoFilter.COMPLETED) {
               keys = todos.keys
                   .cast<int>()
                   .where((key) => todos.get(key)!.isVideoUploaded)
@@ -224,16 +204,12 @@ class _MyHomePageState extends State<Database> {
                   .where((key) => !todos.get(key)!.isVideoUploaded)
                   .toList();
             }
-            print(keys.toString());
-
             return ListView.builder(
               shrinkWrap: true,
               itemBuilder: (_, index) {
                 final int key = keys[index];
                 final TodoModel todo = todos.get(key)!;
-                print(key.toString() +
-                    todo.name.toString() +
-                    ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
+                print('$key${todo.name};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
                 return Container(
                   //height: 10,
                   child: Slidable(
@@ -341,17 +317,14 @@ class _MyHomePageState extends State<Database> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(4.0)),
-                                  onPressed: () async {
-                                    // cardA.currentState?.collapse();
-                                    // navigating to preview
-                                    // await uploadVideoToServer(todo.videoPath); // upload video to server
-                                    // await gettoken();
-                                    // await getprojectid(todo.name);
-                                    // await uploadVideoToServer(todo.videoPath);
-                                    // await uploadCsvToServer(todo.csvPath);
-                                    print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;');
+                                    onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isVideoUploaded) // if token is valid then only button is enabled.
+                                        ? () async => {
+                                          print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
+                                      await getprojectid(todo.name,todo),
+                                      await uploadVideoToServer(todo.videoPath,todo)}
+                                        : null
+                                  ,
 
-                                  },
                                   child: Column(
                                     children: const <Widget>[
                                       Icon(Icons.cloud_upload_rounded),
@@ -367,12 +340,15 @@ class _MyHomePageState extends State<Database> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(10.0)),
-                                  onPressed: () {},
+                                  onPressed: () {
+
+
+                                  },
                                   child: Column(
-                                    children: <Widget>[
+                                    children: const <Widget>[
                                       Icon(Icons.upload_file),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
+                                        padding: EdgeInsets.symmetric(
                                             vertical: 2.0),
                                       ),
                                       Text('Upload Csv'),
