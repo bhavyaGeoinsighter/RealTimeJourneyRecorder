@@ -70,6 +70,7 @@ class _CameraPageState extends State<CameraPage> {
   String? csvFileName;// unique csv filename
   String? csvPath;
   String? videoPath;
+  String? createdOn;
 
   //api
   String? projectid;
@@ -507,7 +508,7 @@ class _CameraPageState extends State<CameraPage> {
       await cacheVideoFile.copy(
         '$videoCsvFolderPath/$videoFileName.mp4',
       );
-      TodoModel todo = TodoModel(id: 1.toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: '$videoCsvFolderPath/$videoFileName.mp4',createdOn: csvFileName.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
+      TodoModel todo = TodoModel(id: 1.toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: '$videoCsvFolderPath/$videoFileName.mp4',createdOn: createdOn.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
       // Adding to the database.
       todoBox.add(todo);
       //
@@ -544,8 +545,11 @@ class _CameraPageState extends State<CameraPage> {
         var dt = DateTime.now();
         final DateTime now = DateTime.now();
         final DateFormat formatter = DateFormat('yMMMEd');
-        final String formatted = formatter.format(now);
+        final DateFormat timeformatter = DateFormat('jm');
+
+        final String formatted = "${timeformatter.format(now)} \n${formatter.format(now)} ";
         // print(formatted);
+        createdOn = '$formatted';
         csvFileName = '$formatted,${dt.hour}-${dt.minute}-${dt.second}';
         videoFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
         folderName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';

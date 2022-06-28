@@ -376,6 +376,8 @@ class _MyHomePageState extends State<Database> {
                                       print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                       if(todo.id.length==0){
                                       await getprojectid(todo.name,todo,key)},
+                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                          content: Text("${todo.name} VIDEO UPLOADING"))),
                                       await uploadVideoToServer(todo.videoPath,todo,key,todo.id).then((statusCode) => {
                                         print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
                                         Scaffold.of(context).showSnackBar(SnackBar(
@@ -413,6 +415,8 @@ class _MyHomePageState extends State<Database> {
                                     print(key.toString() + "key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                     if(todo.id.length==0){
                                       await getprojectid(todo.name,todo,key)},
+                                    Scaffold.of(context).showSnackBar(SnackBar(
+                                        content: Text("${todo.name} CSV UPLOADING"))),
                                     await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
                                       // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
                                       Scaffold.of(context).showSnackBar(SnackBar(
