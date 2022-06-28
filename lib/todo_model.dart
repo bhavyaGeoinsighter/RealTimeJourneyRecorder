@@ -5,7 +5,7 @@ part 'todo_model.g.dart';
 @HiveType(typeId: 0)
 class TodoModel{
   @HiveField(0)
-  final String id;
+  late String id = "";
   @HiveField(1)
   final String name;
   @HiveField(2)
@@ -21,9 +21,9 @@ class TodoModel{
   @HiveField(7)
   final String modifiedOn;
   @HiveField(8)
-  final bool isCsvUploaded;
+  late bool isCsvUploaded;
   @HiveField(9)
-  final bool isVideoUploaded;
+  late bool isVideoUploaded;
 
   TodoModel({required this.id, required this.name, required this.description,required this.videoPath,required this.csvPath,required this.createdOn, required this.extra,required this.isCsvUploaded, required this.isVideoUploaded,required this.modifiedOn});
 

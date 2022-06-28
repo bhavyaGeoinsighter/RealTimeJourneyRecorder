@@ -15,6 +15,8 @@ import 'package:untitled/video_page.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 
 import 'main.dart';
 // import 'package:location/location.dart' as loc;
@@ -540,7 +542,11 @@ class _CameraPageState extends State<CameraPage> {
           name = "Welcome";
         }
         var dt = DateTime.now();
-        csvFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
+        final DateTime now = DateTime.now();
+        final DateFormat formatter = DateFormat('yMMMEd');
+        final String formatted = formatter.format(now);
+        // print(formatted);
+        csvFileName = '$formatted,${dt.hour}-${dt.minute}-${dt.second}';
         videoFileName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
         folderName = '${dt.day}-${dt.month}-${dt.year},${dt.hour}-${dt.minute}-${dt.second}';
       }); //assigning unique file name on every start recording key is pressed.

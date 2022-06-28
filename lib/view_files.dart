@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -26,7 +27,7 @@ class Database extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum TodoFilter { ALL, COMPLETED, INCOMPLETED }
+enum TodoFilter { ALL, VIDEO_UPLOADED, VIDEO_NOT_UPLOADED, CSV_UPLOADED, CSV_NOT_UPLOADED }
 
 class _MyHomePageState extends State<Database> {
   final GlobalKey<ExpansionTileCardState> cardA = new GlobalKey();
@@ -52,7 +53,7 @@ class _MyHomePageState extends State<Database> {
   }
 
   //Get Project Id (API call :- 2)
-  Future<dynamic> getprojectid(String name, TodoModel todo) async {
+  Future<dynamic> getprojectid(String name, TodoModel todo,int key) async {
     final response = await http.post(
       Uri.parse('$serverIpAddress/projectCreate'),
       headers: <String, String>{
@@ -72,6 +73,8 @@ class _MyHomePageState extends State<Database> {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
       setState(() => projectid = body['_id']);
+      todo.id = projectid!;
+      todoBox.put(key, todo);
 
       // return project.fromJson(jsonDecode(response.body));
     } else {
@@ -84,9 +87,9 @@ class _MyHomePageState extends State<Database> {
 
 
   // upload video to server (API call:- 3)
-  uploadVideoToServer(String videoPath,TodoModel todo) async {
+  uploadVideoToServer(String videoPath,TodoModel todo,int key, String id) async {
     // String pi = projectid!;
-    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
+    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':id};
     var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/videoForFlutterApp'),);
     request.headers.addAll(headers);
     // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
@@ -95,8 +98,12 @@ class _MyHomePageState extends State<Database> {
     // print(':::::::::::::::project id :- '+projectid!);
     // print('::::::::::::::::::token :- '+token!);
 
-    request.send().then((response) {
+    return request.send().then((response) {
       print(':;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
+      if(response.statusCode==200){
+        todo.isVideoUploaded = !todo.isVideoUploaded;
+        todoBox.put(key, todo);
+      }
       http.Response.fromStream(response).then((onValue) {
         try {
           // get your response here...
@@ -106,19 +113,26 @@ class _MyHomePageState extends State<Database> {
 
         }
       });
+      return response.statusCode;
     });
+
   }
 
 
   //Upload csv file to server (API call :- 4)
-  uploadCsvToServer(String Csvpath) async {
-    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
+  uploadCsvToServer(String Csvpath,TodoModel todo,int key, String id) async {
+    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':id};
     var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/csvForConversionToSrt'),);
     request.headers.addAll(headers);
     // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
     request.files.add(await http.MultipartFile.fromPath('csv', Csvpath,filename: '$projectid' + 'new.csv',contentType: MediaType('application', 'vnd.ms-excel')));
     request.send().then((response) {
       print(':;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
+      if(response.statusCode==200){
+        todo.isCsvUploaded = !todo.isCsvUploaded;
+        todoBox.put(key, todo);
+
+      }
       http.Response.fromStream(response).then((onValue) {
         try {
           // get your response here...
@@ -128,6 +142,7 @@ class _MyHomePageState extends State<Database> {
 
         }
       });
+      return response.statusCode;
     });
   }
 
@@ -152,9 +167,23 @@ class _MyHomePageState extends State<Database> {
                     filter = TodoFilter.ALL;
                   });
                 }
-                else if (value.compareTo("Compeleted") == 0) {
+                else if (value.compareTo("Video Uploaded") == 0) {
                   setState(() {
-                    filter = TodoFilter.COMPLETED;
+                    filter = TodoFilter.VIDEO_UPLOADED;
+                  });
+                }
+                else if (value.compareTo("Video Not Uploaded") == 0) {
+                  setState(() {
+                    filter = TodoFilter.VIDEO_NOT_UPLOADED;
+                  });
+                }
+                else if (value.compareTo("Csv Uploaded") == 0) {
+                  setState(() {
+                    filter = TodoFilter.CSV_UPLOADED;
+                  });
+                }else if (value.compareTo("Csv Not Uploaded") == 0) {
+                  setState(() {
+                    filter = TodoFilter.CSV_NOT_UPLOADED;
                   });
                 }
                 // Logout
@@ -167,14 +196,14 @@ class _MyHomePageState extends State<Database> {
 
                   });
                 }
-                else {
-                  setState(() {
-                    filter = TodoFilter.INCOMPLETED;
-                  });
-                }
+                // else {
+                //   setState(() {
+                //     filter = TodoFilter.INCOMPLETED;
+                //   });
+                // }
               },
               itemBuilder: (BuildContext context) {
-                return ["All", "Uploaded", "Not Uploaded", "Logout"]
+                return ["All", "Video Uploaded", "Video Not Uploaded","Csv Uploaded","Csv Not Uploaded", "Logout"]
                     .map((option) {
                   return PopupMenuItem(
                     value: option,
@@ -193,12 +222,29 @@ class _MyHomePageState extends State<Database> {
             if (filter == TodoFilter.ALL) {
               keys = todos.keys.cast<int>().toList();
             }
-            else if (filter == TodoFilter.COMPLETED) {
+            else if (filter == TodoFilter.VIDEO_UPLOADED) {
               keys = todos.keys
                   .cast<int>()
                   .where((key) => todos.get(key)!.isVideoUploaded)
                   .toList();
-            } else {
+            }
+            else if (filter == TodoFilter.VIDEO_NOT_UPLOADED) {
+              keys = todos.keys
+                  .cast<int>()
+                  .where((key) => !todos.get(key)!.isVideoUploaded)
+                  .toList();
+            }else if (filter == TodoFilter.CSV_UPLOADED) {
+              keys = todos.keys
+                  .cast<int>()
+                  .where((key) => todos.get(key)!.isCsvUploaded)
+                  .toList();
+            }else if (filter == TodoFilter.CSV_NOT_UPLOADED) {
+              keys = todos.keys
+                  .cast<int>()
+                  .where((key) => !todos.get(key)!.isCsvUploaded)
+                  .toList();
+            }
+            else {
               keys = todos.keys
                   .cast<int>()
                   .where((key) => !todos.get(key)!.isVideoUploaded)
@@ -226,11 +272,18 @@ class _MyHomePageState extends State<Database> {
                             // todoBox.delete(key);
                             print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
                             todoBox.deleteAt(index);
+                            File videoFile = File(todo.videoPath);
+                            videoFile.delete();
+                            File csvFile = File(todo.csvPath);
+                            csvFile.delete();
+
+
                             print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
                           });
 
                           Scaffold.of(context).showSnackBar(SnackBar(
-                              content: Text("${todo.name} dismissed")));
+                            backgroundColor: Colors.red,
+                              content: Text("${todo.name} deleted",)));
                         }),
 
                         // All actions are defined in the children parameter.
@@ -258,7 +311,7 @@ class _MyHomePageState extends State<Database> {
 
                           trailing: Icon(
                             Icons.menu_open_outlined,
-                            color: todo.isVideoUploaded
+                            color: todo.isVideoUploaded && todo.isCsvUploaded
                                 ? Colors.green
                                 : Colors.red,
                           ),
@@ -320,8 +373,18 @@ class _MyHomePageState extends State<Database> {
                                     onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isVideoUploaded) // if token is valid then only button is enabled.
                                         ? () async => {
                                           print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
-                                      await getprojectid(todo.name,todo),
-                                      await uploadVideoToServer(todo.videoPath,todo)}
+                                      print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                      if(todo.id.length==0){
+                                      await getprojectid(todo.name,todo,key)},
+                                      await uploadVideoToServer(todo.videoPath,todo,key,todo.id).then((statusCode) => {
+                                        print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                        Scaffold.of(context).showSnackBar(SnackBar(
+                                        content: Text("${todo.name} VIDEO UPLOADED")))
+                                      }),
+                                      print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+
+
+                                    }
                                         : null
                                   ,
 
@@ -340,10 +403,31 @@ class _MyHomePageState extends State<Database> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(10.0)),
-                                  onPressed: () {
+                                  // onPressed: () {
+                                  //
+                                  //
+                                  // },
+                                  onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isCsvUploaded) // if token is valid then only button is enabled.
+                                      ? () async => {
+                                    print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
+                                    print(key.toString() + "key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                    if(todo.id.length==0){
+                                      await getprojectid(todo.name,todo,key)},
+                                    await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
+                                      // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                          content: Text("${todo.name} CSV UPLOADED")))
+                                    }),
+
+    // Scaffold.of(context).showSnackBar(SnackBar(
+    // content: Text("${todo.name} CSV UPLOADED"))),
+
+                                    print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
 
 
-                                  },
+                                  }
+                                      : null
+                                  ,
                                   child: Column(
                                     children: const <Widget>[
                                       Icon(Icons.upload_file),
