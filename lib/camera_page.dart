@@ -10,12 +10,14 @@ import 'package:hive/hive.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:location/location.dart';
 import 'package:untitled/todo_model.dart';
+import 'package:untitled/token_model.dart';
 import 'package:untitled/video_page.dart';
 // import 'package:geocoding/geocoding.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:untitled/view_files.dart';
 
 
 import 'main.dart';
@@ -80,11 +82,15 @@ class _CameraPageState extends State<CameraPage> {
 
   bool isFlashModeOn = true;
   late Box<TodoModel> todoBox;
+  late Box<tokenModel> tokenBox;
 
   @override
   void initState() {
     super.initState();
     todoBox = Hive.box<TodoModel>(todoBoxName);
+    tokenBox = Hive.box<tokenModel>(tokenBoxName);
+
+    setState(() => token = tokenBox.get('token')?.token);
     _initCamera();
   }
 
@@ -287,7 +293,7 @@ class _CameraPageState extends State<CameraPage> {
 
 
   //Get Project Id (API call :- 2)
-  Future<project> getprojectid() async {
+  Future<project> getprojectid(String name, TodoModel todo,int key) async {
     final response = await http.post(
       Uri.parse('$serverIpAddress/projectCreate'),
       headers: <String, String>{
@@ -307,6 +313,8 @@ class _CameraPageState extends State<CameraPage> {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
       setState(() => projectid = body['_id']);
+      todo.id = projectid!;
+      todoBox.put(key, todo);
 
       return project.fromJson(jsonDecode(response.body));
     } else {
@@ -319,19 +327,23 @@ class _CameraPageState extends State<CameraPage> {
 
 
   // upload video to server (API call:- 3)
-  uploadVideoToServer(XFile videoPath) async {
+  uploadVideoToServer(String videoPath,TodoModel todo,int key, String id) async {
     // String pi = projectid!;
-    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
+    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':id};
     var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/videoForFlutterApp'),);
     request.headers.addAll(headers);
     // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
-    request.files.add(await http.MultipartFile.fromPath('video', videoPath.path,filename: '$projectid' + '_video.mp4',contentType: MediaType('video', 'mp4')));
+    request.files.add(await http.MultipartFile.fromPath('video', videoPath,filename: '$projectid' + '_video.mp4',contentType: MediaType('video', 'mp4')));
 
     // print(':::::::::::::::project id :- '+projectid!);
     // print('::::::::::::::::::token :- '+token!);
 
     request.send().then((response) {
       // print(':;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
+      if(response.statusCode==200){
+        todo.isVideoUploaded = !todo.isVideoUploaded;
+        todoBox.put(key, todo);
+      }
       http.Response.fromStream(response).then((onValue) {
         try {
           // get your response here...
@@ -346,14 +358,18 @@ class _CameraPageState extends State<CameraPage> {
 
 
   //Upload csv file to server (API call :- 4)
-  uploadCsvToServer(String Csvpath) async {
-    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':projectid!};
+  uploadCsvToServer(String Csvpath, TodoModel todo, int key,String id) async {
+    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':id};
     var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/csvForConversionToSrt'),);
     request.headers.addAll(headers);
     // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
     request.files.add(await http.MultipartFile.fromPath('csv', Csvpath,filename: '$projectid' + 'new.csv',contentType: MediaType('application', 'vnd.ms-excel')));
     request.send().then((response) {
       print(':;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
+      if(response.statusCode==200){
+        todo.isCsvUploaded = !todo.isCsvUploaded;
+        todoBox.put(key, todo);
+      }
       http.Response.fromStream(response).then((onValue) {
         try {
           // get your response here...
@@ -430,7 +446,7 @@ class _CameraPageState extends State<CameraPage> {
 }
 
 
-
+  //Not Used
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = _cameraController;
     // Instantiating the camera controller
@@ -508,28 +524,42 @@ class _CameraPageState extends State<CameraPage> {
       await cacheVideoFile.copy(
         '$videoCsvFolderPath/$videoFileName.mp4',
       );
-      TodoModel todo = TodoModel(id: 1.toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: '$videoCsvFolderPath/$videoFileName.mp4',createdOn: createdOn.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
+      print(todoBox.keys.toString()+'------------keys;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
+      TodoModel todo = TodoModel(id: "".toString(),csvPath:csvPath.toString(),name:name.toString(),description: description.toString(),videoPath: '$videoCsvFolderPath/$videoFileName.mp4',createdOn: createdOn.toString(),modifiedOn: videoFileName.toString(),isVideoUploaded: false,isCsvUploaded: false, extra: '' );
       // Adding to the database.
       todoBox.add(todo);
-      //
-      XFile newVideoFile = XFile('$videoCsvFolderPath/$videoFileName.mp4');
-
+      int keyOfCurrTodo = todoBox.keyAt(todoBox.length-1);
+      // print(keyOfCurrTodo.toString()+'------------currkey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
+      // XFile newVideoFile = XFile('$videoCsvFolderPath/$videoFileName.mp4');
       //delete from cache
       await cacheVideoFile.delete();
       //
-      // await gpsCurrPosStream?.cancel();  //cancelling gps stream once recording gets stop.
-      gpsLocationStream?.cancel();
+      // await gpsCurrPosStream?.cancel();  //cancelling gps stream of geolocator plugin once recording gets stop.
+      gpsLocationStream?.cancel();   //cancelling gps stream of Location plugin once recording gets stop.
       // mytimer?.cancel();
+      // await getprojectid(todo.name,todo,key),
       // await uploadVideoToServer(newVideoFile); // upload video to server
       // await uploadCsvToServer(csvPath!); // upload csv file to server
-
-      //navigating to preview
+      // // navigating to preview
       // final route = MaterialPageRoute(
       //   fullscreenDialog: true,
-      //   builder: (_) => VideoPage(filePath: file.path),
+      //   builder: (_) => Database(),
       // );
       //
       //  Navigator.push(context, route);
+      try {
+        final result = await InternetAddress.lookup('example.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          print('connected');
+          // print('name, path, description ------- '+ todo.name+ '--------'+ todo.videoPath + '-----'+todo.description);
+          await getprojectid(todo.name,todo,keyOfCurrTodo);
+          await uploadCsvToServer(todo.csvPath,todo,keyOfCurrTodo,todo.id);
+          await uploadVideoToServer(todo.videoPath,todo,keyOfCurrTodo,todo.id);
+
+        }
+      } on SocketException catch (_) {
+        print('not connected');
+      }
       Navigator.pop(context);
 
     } else {
@@ -546,7 +576,6 @@ class _CameraPageState extends State<CameraPage> {
         final DateTime now = DateTime.now();
         final DateFormat formatter = DateFormat('yMMMEd');
         final DateFormat timeformatter = DateFormat('jm');
-
         final String formatted = "${timeformatter.format(now)} \n${formatter.format(now)} ";
         // print(formatted);
         createdOn = '$formatted';

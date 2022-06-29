@@ -370,25 +370,40 @@ class _MyHomePageState extends State<Database> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(4.0)),
-                                    onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isVideoUploaded) // if token is valid then only button is enabled.
+                                    onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isVideoUploaded && !todo.isCsvUploaded) // if token is valid then only button is enabled.
                                         ? () async => {
                                           print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
                                       print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                      print("${todo.id} ----- id;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+
                                       if(todo.id.length==0){
-                                      await getprojectid(todo.name,todo,key)},
-                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                      await getprojectid(todo.name,todo,key),
+                                      },
+
+                                      if(!todo.isCsvUploaded){
+                                        print("${todo.id}  ---- ${todo.name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+
+                                        Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text("${todo.name} CSV UPLOADING"))),
+                                        await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
+                                          // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                              content: Text("${todo.name} CSV UPLOADED")))
+                                        }),
+                                      },
+                                      if(!todo.isVideoUploaded){
+                                        print("${todo.id}  ---- ${todo.name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+
+                                        Scaffold.of(context).showSnackBar(SnackBar(
                                           content: Text("${todo.name} VIDEO UPLOADING"))),
-                                      await uploadVideoToServer(todo.videoPath,todo,key,todo.id).then((statusCode) => {
+                                        await uploadVideoToServer(todo.videoPath,todo,key,todo.id).then((statusCode) => {
                                         print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
                                         Scaffold.of(context).showSnackBar(SnackBar(
                                         content: Text("${todo.name} VIDEO UPLOADED")))
-                                      }),
-                                      print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-
-
+                                      }),},
+                                      // print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                     }
-                                        : null
-                                  ,
+                                        : null,
 
                                   child: Column(
                                     children: const <Widget>[
@@ -397,52 +412,54 @@ class _MyHomePageState extends State<Database> {
                                         padding: EdgeInsets.symmetric(
                                             vertical: 2.0),
                                       ),
-                                      Text('Upload Video'),
+                                      Text('Upload'),
+
+                                      Text('Video/Csv'),
                                     ],
                                   ),
                                 ),
-                                FlatButton(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(10.0)),
-                                  // onPressed: () {
-                                  //
-                                  //
-                                  // },
-                                  onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isCsvUploaded) // if token is valid then only button is enabled.
-                                      ? () async => {
-                                    print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
-                                    print(key.toString() + "key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                    if(todo.id.length==0){
-                                      await getprojectid(todo.name,todo,key)},
-                                    Scaffold.of(context).showSnackBar(SnackBar(
-                                        content: Text("${todo.name} CSV UPLOADING"))),
-                                    await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
-                                      // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                      Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text("${todo.name} CSV UPLOADED")))
-                                    }),
-
-    // Scaffold.of(context).showSnackBar(SnackBar(
-    // content: Text("${todo.name} CSV UPLOADED"))),
-
-                                    print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-
-
-                                  }
-                                      : null
-                                  ,
-                                  child: Column(
-                                    children: const <Widget>[
-                                      Icon(Icons.upload_file),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 2.0),
-                                      ),
-                                      Text('Upload Csv'),
-                                    ],
-                                  ),
-                                ),
+    //                             FlatButton(
+    //                               shape: RoundedRectangleBorder(
+    //                                   borderRadius:
+    //                                       BorderRadius.circular(10.0)),
+    //                               // onPressed: () {
+    //                               //
+    //                               //
+    //                               // },
+    //                               onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isCsvUploaded) // if token is valid then only button is enabled.
+    //                                   ? () async => {
+    //                                 print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
+    //                                 print(key.toString() + "key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+    //                                 if(todo.id.length==0){
+    //                                   await getprojectid(todo.name,todo,key)},
+    //                                 Scaffold.of(context).showSnackBar(SnackBar(
+    //                                     content: Text("${todo.name} CSV UPLOADING"))),
+    //                                 await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
+    //                                   // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
+    //                                   Scaffold.of(context).showSnackBar(SnackBar(
+    //                                       content: Text("${todo.name} CSV UPLOADED")))
+    //                                 }),
+    //
+    // // Scaffold.of(context).showSnackBar(SnackBar(
+    // // content: Text("${todo.name} CSV UPLOADED"))),
+    //
+    //                                 print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+    //
+    //
+    //                               }
+    //                                   : null
+    //                               ,
+    //                               child: Column(
+    //                                 children: const <Widget>[
+    //                                   Icon(Icons.upload_file),
+    //                                   Padding(
+    //                                     padding: EdgeInsets.symmetric(
+    //                                         vertical: 2.0),
+    //                                   ),
+    //                                   Text('Upload Csv'),
+    //                                 ],
+    //                               ),
+    //                             ),
 
                               ],
                             )
