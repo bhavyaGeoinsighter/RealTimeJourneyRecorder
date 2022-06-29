@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:untitled/camera_page.dart';
-import 'package:untitled/todo_model.dart';
+import 'package:untitled/journey_model.dart';
 import 'package:untitled/view_files.dart';
 
 class startJourneyScreen extends StatefulWidget {

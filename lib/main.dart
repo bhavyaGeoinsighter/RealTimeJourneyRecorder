@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled/camera_page.dart';
 import 'package:untitled/start_journey_page.dart';
-import 'package:untitled/todo_model.dart';
+import 'package:untitled/journey_model.dart';
 import 'package:untitled/token_model.dart';
 import 'package:untitled/view_files.dart';
 import 'package:http/http.dart' as http;
@@ -17,17 +17,17 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 
 
-const String todoBoxName = "todo3";
+const String journeyBoxName = "journey3";
 const String tokenBoxName = "token";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final document = await getApplicationDocumentsDirectory();
   Hive.init(document.path);
-  Hive.registerAdapter(TodoModelAdapter());
+  Hive.registerAdapter(journeyModelAdapter());
   Hive.registerAdapter(tokenModelAdapter());
 
-  await Hive.openBox<TodoModel>(todoBoxName);
+  await Hive.openBox<journeyModel>(journeyBoxName);
   await Hive.openBox<tokenModel>(tokenBoxName);
 
   runApp(const MyApp());
@@ -204,7 +204,7 @@ class _LoginDemoState extends State<LoginDemo> {
             ),
             FlatButton(
               onPressed: (){
-                //TODO FORGOT PASSWORD SCREEN GOES HERE
+                //journey FORGOT PASSWORD SCREEN GOES HERE
               },
               child: Text(
                 'Forgot Password',
@@ -235,7 +235,7 @@ class _LoginDemoState extends State<LoginDemo> {
             ),
             FlatButton(
               onPressed: (){
-                //TODO skip
+                //journey skip
 
                 print('token at login page:- ${tokenBox.length}----------------------------------');
                 Navigator.push(

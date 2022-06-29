@@ -9,8 +9,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:untitled/todo_model.dart';
+import 'package:untitled/journey_model.dart';
 import 'package:untitled/token_model.dart';
+import 'package:untitled/uploading_functions.dart';
 import 'package:untitled/video_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 
 
+import 'constants.dart';
 import 'main.dart';
 
 class Database extends StatefulWidget {
@@ -27,126 +29,28 @@ class Database extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum TodoFilter { ALL, VIDEO_UPLOADED, VIDEO_NOT_UPLOADED, CSV_UPLOADED, CSV_NOT_UPLOADED }
+enum journeyFilter { ALL, VIDEO_UPLOADED, VIDEO_NOT_UPLOADED, CSV_UPLOADED, CSV_NOT_UPLOADED }
 
 class _MyHomePageState extends State<Database> {
   final GlobalKey<ExpansionTileCardState> cardA = new GlobalKey();
-
-  late Box<TodoModel> todoBox;
+  late final Upload upload;
+  late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
 
-  //api
-  String? projectid;
-  String? serverIpAddress='http://15.206.73.160:8081/api';
+  //api token
   String? token;
 
-  TodoFilter filter = TodoFilter.ALL;
+  journeyFilter filter = journeyFilter.ALL;
 
   @override
   void initState() {
-    // TODO: implement initState
+    // journey: implement initState
     super.initState();
-    todoBox = Hive.box<TodoModel>(todoBoxName);
+    journeyBox = Hive.box<journeyModel>(journeyBoxName);
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
     setState(() => token = tokenBox.get('token')?.token);
 
   }
-
-  //Get Project Id (API call :- 2)
-  Future<dynamic> getprojectid(String name, TodoModel todo,int key) async {
-    final response = await http.post(
-      Uri.parse('$serverIpAddress/projectCreate'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(<String, String>{
-        'projectName': name.toString(),
-        'type': 'video'
-      }),
-    );
-    final body = json.decode(response.body);
-    print( '----------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
-    // setState(() => projectid = body['_id']);
-
-    if (response.statusCode == 200) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
-      setState(() => projectid = body['_id']);
-      todo.id = projectid!;
-      todoBox.put(key, todo);
-
-      // return project.fromJson(jsonDecode(response.body));
-    } else {
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
-      throw Exception('Failed to create project.');
-    }
-  }
-
-
-
-  // upload video to server (API call:- 3)
-  uploadVideoToServer(String videoPath,TodoModel todo,int key, String id) async {
-    // String pi = projectid!;
-    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':id};
-    var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/videoForFlutterApp'),);
-    request.headers.addAll(headers);
-    // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
-    request.files.add(await http.MultipartFile.fromPath('video', videoPath,filename: '$projectid' + '_video.mp4',contentType: MediaType('video', 'mp4')));
-
-    // print(':::::::::::::::project id :- '+projectid!);
-    // print('::::::::::::::::::token :- '+token!);
-
-    return request.send().then((response) {
-      print(':;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
-      if(response.statusCode==200){
-        todo.isVideoUploaded = !todo.isVideoUploaded;
-        todoBox.put(key, todo);
-      }
-      http.Response.fromStream(response).then((onValue) {
-        try {
-          // get your response here...
-        } catch (e) {
-          // handle exeption
-          // print('------------'+e.toString());
-
-        }
-      });
-      return response.statusCode;
-    });
-
-  }
-
-
-  //Upload csv file to server (API call :- 4)
-  uploadCsvToServer(String Csvpath,TodoModel todo,int key, String id) async {
-    Map<String, String> headers = { 'Authorization': 'Bearer $token','projectid':id};
-    var request =  http.MultipartRequest("POST", Uri.parse('$serverIpAddress/upload/csvForConversionToSrt'),);
-    request.headers.addAll(headers);
-    // int filenameSize = datetime.toString().length - 4; // filename: datetime.mp4 (removing .csv from datetime text here)
-    request.files.add(await http.MultipartFile.fromPath('csv', Csvpath,filename: '$projectid' + 'new.csv',contentType: MediaType('application', 'vnd.ms-excel')));
-    request.send().then((response) {
-      print(':;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
-      if(response.statusCode==200){
-        todo.isCsvUploaded = !todo.isCsvUploaded;
-        todoBox.put(key, todo);
-
-      }
-      http.Response.fromStream(response).then((onValue) {
-        try {
-          // get your response here...
-        } catch (e) {
-          // handle exeption
-          print('-------------------------------'+e.toString());
-
-        }
-      });
-      return response.statusCode;
-    });
-  }
-
-
 
 
 
@@ -160,36 +64,36 @@ class _MyHomePageState extends State<Database> {
           actions: <Widget>[
             PopupMenuButton<String>(
               onSelected: (value) {
-                ///Todo : Take action accordingly
+                ///journey : Take action accordingly
                 ///
                 if (value.compareTo("All") == 0) {
                   setState(() {
-                    filter = TodoFilter.ALL;
+                    filter = journeyFilter.ALL;
                   });
                 }
                 else if (value.compareTo("Video Uploaded") == 0) {
                   setState(() {
-                    filter = TodoFilter.VIDEO_UPLOADED;
+                    filter = journeyFilter.VIDEO_UPLOADED;
                   });
                 }
                 else if (value.compareTo("Video Not Uploaded") == 0) {
                   setState(() {
-                    filter = TodoFilter.VIDEO_NOT_UPLOADED;
+                    filter = journeyFilter.VIDEO_NOT_UPLOADED;
                   });
                 }
                 else if (value.compareTo("Csv Uploaded") == 0) {
                   setState(() {
-                    filter = TodoFilter.CSV_UPLOADED;
+                    filter = journeyFilter.CSV_UPLOADED;
                   });
                 }else if (value.compareTo("Csv Not Uploaded") == 0) {
                   setState(() {
-                    filter = TodoFilter.CSV_NOT_UPLOADED;
+                    filter = journeyFilter.CSV_NOT_UPLOADED;
                   });
                 }
                 // Logout
                 else if (value.compareTo("Logout") == 0) {
                   setState(() {
-                    // filter = TodoFilter.COMPLETED;
+                    // filter = journeyFilter.COMPLETED;
                     tokenModel tm = tokenModel(token: "");
                     tokenBox.put('token', tm);
                     print('token after logout:- ${tokenBox.get('token')?.token}----------------------------------');
@@ -198,7 +102,7 @@ class _MyHomePageState extends State<Database> {
                 }
                 // else {
                 //   setState(() {
-                //     filter = TodoFilter.INCOMPLETED;
+                //     filter = journeyFilter.INCOMPLETED;
                 //   });
                 // }
               },
@@ -215,47 +119,47 @@ class _MyHomePageState extends State<Database> {
           ],
         ),
         body: ValueListenableBuilder(
-          valueListenable: todoBox.listenable(),
-          builder: (context, Box<TodoModel> todos, _) {
+          valueListenable: journeyBox.listenable(),
+          builder: (context, Box<journeyModel> journeys, _) {
             List<int> keys;
 
-            if (filter == TodoFilter.ALL) {
-              keys = todos.keys.cast<int>().toList();
+            if (filter == journeyFilter.ALL) {
+              keys = journeys.keys.cast<int>().toList();
             }
-            else if (filter == TodoFilter.VIDEO_UPLOADED) {
-              keys = todos.keys
+            else if (filter == journeyFilter.VIDEO_UPLOADED) {
+              keys = journeys.keys
                   .cast<int>()
-                  .where((key) => todos.get(key)!.isVideoUploaded)
+                  .where((key) => journeys.get(key)!.isVideoUploaded)
                   .toList();
             }
-            else if (filter == TodoFilter.VIDEO_NOT_UPLOADED) {
-              keys = todos.keys
+            else if (filter == journeyFilter.VIDEO_NOT_UPLOADED) {
+              keys = journeys.keys
                   .cast<int>()
-                  .where((key) => !todos.get(key)!.isVideoUploaded)
+                  .where((key) => !journeys.get(key)!.isVideoUploaded)
                   .toList();
-            }else if (filter == TodoFilter.CSV_UPLOADED) {
-              keys = todos.keys
+            }else if (filter == journeyFilter.CSV_UPLOADED) {
+              keys = journeys.keys
                   .cast<int>()
-                  .where((key) => todos.get(key)!.isCsvUploaded)
+                  .where((key) => journeys.get(key)!.isCsvUploaded)
                   .toList();
-            }else if (filter == TodoFilter.CSV_NOT_UPLOADED) {
-              keys = todos.keys
+            }else if (filter == journeyFilter.CSV_NOT_UPLOADED) {
+              keys = journeys.keys
                   .cast<int>()
-                  .where((key) => !todos.get(key)!.isCsvUploaded)
+                  .where((key) => !journeys.get(key)!.isCsvUploaded)
                   .toList();
             }
             else {
-              keys = todos.keys
+              keys = journeys.keys
                   .cast<int>()
-                  .where((key) => !todos.get(key)!.isVideoUploaded)
+                  .where((key) => !journeys.get(key)!.isVideoUploaded)
                   .toList();
             }
             return ListView.builder(
               shrinkWrap: true,
               itemBuilder: (_, index) {
                 final int key = keys[index];
-                final TodoModel todo = todos.get(key)!;
-                print('$key${todo.name};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
+                final journeyModel journey = journeys.get(key)!;
+                // print('$key${journey.name};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
                 return Container(
                   //height: 10,
                   child: Slidable(
@@ -269,12 +173,12 @@ class _MyHomePageState extends State<Database> {
                         // A pane can dismiss the Slidable.
                         dismissible: DismissiblePane(onDismissed: () {
                           setState(() {
-                            // todoBox.delete(key);
+                            // journeyBox.delete(key);
                             print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
-                            todoBox.deleteAt(index);
-                            File videoFile = File(todo.videoPath);
+                            journeyBox.deleteAt(index);
+                            File videoFile = File(journey.videoPath);
                             videoFile.delete();
-                            File csvFile = File(todo.csvPath);
+                            File csvFile = File(journey.csvPath);
                             csvFile.delete();
 
 
@@ -283,7 +187,7 @@ class _MyHomePageState extends State<Database> {
 
                           Scaffold.of(context).showSnackBar(SnackBar(
                             backgroundColor: Colors.red,
-                              content: Text("${todo.name} deleted",)));
+                              content: Text("${journey.name} deleted",)));
                         }),
 
                         // All actions are defined in the children parameter.
@@ -302,16 +206,16 @@ class _MyHomePageState extends State<Database> {
 
                       child: ExpansionTile(
                           title: Text(
-                            todo.name,
-                            style: TextStyle(fontSize: 24),
+                            journey.name,
+                            style: const TextStyle(fontSize: 24),
                           ),
-                          subtitle: Text(todo.createdOn,
-                              style: TextStyle(fontSize: 15)),
-                          leading: Icon(Icons.video_call,size: 40,),
+                          subtitle: Text(journey.createdOn,
+                              style: const TextStyle(fontSize: 15)),
+                          leading: const Icon(Icons.video_call,size: 40,),
 
                           trailing: Icon(
                             Icons.menu_open_outlined,
-                            color: todo.isVideoUploaded && todo.isCsvUploaded
+                            color: journey.isVideoUploaded && journey.isCsvUploaded
                                 ? Colors.green
                                 : Colors.red,
                           ),
@@ -329,7 +233,7 @@ class _MyHomePageState extends State<Database> {
                                   vertical: 8.0,
                                 ),
                                 child: Text(
-                                      todo.description,
+                                      journey.description,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyText2
@@ -350,7 +254,7 @@ class _MyHomePageState extends State<Database> {
                                     // cardA.currentState?.expand();
                                     final route = MaterialPageRoute(
                                       fullscreenDialog: true,
-                                      builder: (_) => VideoPage(filePath:todo.videoPath),
+                                      builder: (_) => VideoPage(filePath:journey.videoPath),
                                     );
 
                                     Navigator.push(context, route);
@@ -370,38 +274,43 @@ class _MyHomePageState extends State<Database> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(4.0)),
-                                    onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isVideoUploaded && !todo.isCsvUploaded) // if token is valid then only button is enabled.
+                                    onPressed: ( !journey.isVideoUploaded && !journey.isCsvUploaded) // if token is valid then only button is enabled.
                                         ? () async => {
+                                    if(tokenBox.get('token')?.token.length==0){
+                                      Scaffold.of(context).showSnackBar(SnackBar(
+                                          content: Text(" Please sign in."))),
+                                    },
                                           print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
-                                      print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                      print("${todo.id} ----- id;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                          print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                          print("${journey.id} ----- id;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
 
-                                      if(todo.id.length==0){
-                                      await getprojectid(todo.name,todo,key),
-                                      },
+                                          upload = Upload(),
+                                          if(journey.id.length==0){
+                                          await upload.getprojectid(token!,journey.name,journey,key),
+                                          },
 
-                                      if(!todo.isCsvUploaded){
-                                        print("${todo.id}  ---- ${todo.name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                      if(!journey.isCsvUploaded){
+                                        print("${journey.id}  ---- ${journey.name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
 
                                         Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text("${todo.name} CSV UPLOADING"))),
-                                        await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
+                                            content: Text("${journey.name} CSV UPLOADING"))),
+                                        await upload.uploadCsvToServer(token!,journey.csvPath,journey,key,journey.id).then((statusCode) => {
                                           // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
                                           Scaffold.of(context).showSnackBar(SnackBar(
-                                              content: Text("${todo.name} CSV UPLOADED")))
+                                              content: Text("${journey.name} CSV UPLOADED")))
                                         }),
                                       },
-                                      if(!todo.isVideoUploaded){
-                                        print("${todo.id}  ---- ${todo.name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                      if(!journey.isVideoUploaded){
+                                        print("${journey.id}  ---- ${journey.name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
 
                                         Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text("${todo.name} VIDEO UPLOADING"))),
-                                        await uploadVideoToServer(todo.videoPath,todo,key,todo.id).then((statusCode) => {
+                                          content: Text("${journey.name} VIDEO UPLOADING"))),
+                                        await upload.uploadVideoToServer(token!,journey.videoPath,journey,key,journey.id).then((statusCode) => {
                                         print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
                                         Scaffold.of(context).showSnackBar(SnackBar(
-                                        content: Text("${todo.name} VIDEO UPLOADED")))
+                                        content: Text("${journey.name} VIDEO UPLOADED")))
                                       }),},
-                                      // print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                      // print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                     }
                                         : null,
 
@@ -414,7 +323,7 @@ class _MyHomePageState extends State<Database> {
                                       ),
                                       Text('Upload'),
 
-                                      Text('Video/Csv'),
+                                      Text('Video & Csv'),
                                     ],
                                   ),
                                 ),
@@ -426,24 +335,24 @@ class _MyHomePageState extends State<Database> {
     //                               //
     //                               //
     //                               // },
-    //                               onPressed: (tokenBox.get('token')?.token.length!=0 && !todo.isCsvUploaded) // if token is valid then only button is enabled.
+    //                               onPressed: (tokenBox.get('token')?.token.length!=0 && !journey.isCsvUploaded) // if token is valid then only button is enabled.
     //                                   ? () async => {
     //                                 print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
     //                                 print(key.toString() + "key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-    //                                 if(todo.id.length==0){
-    //                                   await getprojectid(todo.name,todo,key)},
+    //                                 if(journey.id.length==0){
+    //                                   await getprojectid(journey.name,journey,key)},
     //                                 Scaffold.of(context).showSnackBar(SnackBar(
-    //                                     content: Text("${todo.name} CSV UPLOADING"))),
-    //                                 await uploadCsvToServer(todo.csvPath,todo,key,todo.id).then((statusCode) => {
+    //                                     content: Text("${journey.name} CSV UPLOADING"))),
+    //                                 await uploadCsvToServer(journey.csvPath,journey,key,journey.id).then((statusCode) => {
     //                                   // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
     //                                   Scaffold.of(context).showSnackBar(SnackBar(
-    //                                       content: Text("${todo.name} CSV UPLOADED")))
+    //                                       content: Text("${journey.name} CSV UPLOADED")))
     //                                 }),
     //
     // // Scaffold.of(context).showSnackBar(SnackBar(
-    // // content: Text("${todo.name} CSV UPLOADED"))),
+    // // content: Text("${journey.name} CSV UPLOADED"))),
     //
-    //                                 print("${todo.id}  ---- ${todo.name} ------  id of todo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+    //                                 print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
     //
     //
     //                               }

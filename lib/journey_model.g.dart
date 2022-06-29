@@ -1,22 +1,22 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'todo_model.dart';
+part of 'journey_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class TodoModelAdapter extends TypeAdapter<TodoModel> {
+class journeyModelAdapter extends TypeAdapter<journeyModel> {
   @override
   final int typeId = 0;
 
   @override
-  TodoModel read(BinaryReader reader) {
+  journeyModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return TodoModel(
+    return journeyModel(
       id: fields[0] as String,
       name: fields[1] as String,
       description: fields[2] as String,
@@ -31,7 +31,7 @@ class TodoModelAdapter extends TypeAdapter<TodoModel> {
   }
 
   @override
-  void write(BinaryWriter writer, TodoModel obj) {
+  void write(BinaryWriter writer, journeyModel obj) {
     writer
       ..writeByte(10)
       ..writeByte(0)
@@ -62,7 +62,7 @@ class TodoModelAdapter extends TypeAdapter<TodoModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TodoModelAdapter &&
+      other is journeyModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
