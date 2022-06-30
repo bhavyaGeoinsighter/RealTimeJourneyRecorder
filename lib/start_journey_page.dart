@@ -5,7 +5,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:untitled/camera_page.dart';
 import 'package:untitled/journey_model.dart';
 import 'package:untitled/settings.dart';
+import 'package:untitled/settings_model.dart';
+import 'package:untitled/token_model.dart';
+import 'package:untitled/uploading_functions.dart';
 import 'package:untitled/view_files.dart';
+
+import 'constants.dart';
+import 'main.dart';
 
 class startJourneyScreen extends StatefulWidget {
   const startJourneyScreen({Key? key}) : super(key: key);
@@ -17,6 +23,43 @@ class startJourneyScreen extends StatefulWidget {
 class _startJourneyScreen extends State<startJourneyScreen> {
   TextEditingController name = TextEditingController();
   TextEditingController desciption = TextEditingController();
+  late Box<journeyModel> journeyBox;
+  late Box<settingsModel> settingsBox;
+  late Box<tokenModel> tokenBox;
+
+  late final Upload upload = Upload();
+  late final constantFunctions constants = constantFunctions();
+
+
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    journeyBox = Hive.box<journeyModel>(journeyBoxName);
+    settingsBox = Hive.box<settingsModel>(settingsBoxName);
+    tokenBox = Hive.box<tokenModel>(tokenBoxName);
+    // settingsModel sm = settingsModel(resolution: "720p", automatic: true);
+    // settingsBox.put("settings", sm);
+    // settingsBox.put('settings', )
+
+    //autoUpload if Internet is connected and automatic upload is true from settings.
+    if(settingsBox.length==0){
+      settingsModel sm = settingsModel(resolution: "720p", automatic: true);
+      settingsBox.put('settings', sm);
+    }
+    if(settingsBox.length!=0 && settingsBox.get('settings')!.automatic) {
+      upload.autoUpload();
+    }
+
+
+
+    // tokenBox = Hive.box<tokenModel>(tokenBoxName);
+    // print('token at login page:- '+tokenBox.get(0).token.toString()+'----------------------------------');
+  }
+
+
 
 
 
@@ -154,6 +197,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                               child: IconButton(
                                 color: Colors.white,
                                 onPressed: () {
+                                  print(settingsBox.length.toString()+"---------------settingbox length");
                                   Navigator.push(
                                       context,
                                       CupertinoPageRoute(

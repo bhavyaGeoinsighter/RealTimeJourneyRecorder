@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled/camera_page.dart';
+import 'package:untitled/settings_model.dart';
 import 'package:untitled/start_journey_page.dart';
 import 'package:untitled/journey_model.dart';
 import 'package:untitled/token_model.dart';
@@ -19,6 +20,8 @@ import 'dart:async';
 
 const String journeyBoxName = "journey3";
 const String tokenBoxName = "token";
+const String settingsBoxName = "settings";
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +29,13 @@ Future<void> main() async {
   Hive.init(document.path);
   Hive.registerAdapter(journeyModelAdapter());
   Hive.registerAdapter(tokenModelAdapter());
+  Hive.registerAdapter(settingsModelAdapter());
+
 
   await Hive.openBox<journeyModel>(journeyBoxName);
   await Hive.openBox<tokenModel>(tokenBoxName);
+  await Hive.openBox<settingsModel>(settingsBoxName);
+
 
   runApp(const MyApp());
 }

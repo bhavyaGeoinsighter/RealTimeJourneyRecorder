@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:untitled/settings_model.dart';
+import 'package:untitled/token_model.dart';
+import 'package:untitled/uploading_functions.dart';
+
+import 'main.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -8,7 +14,21 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool upload = false;
+  late Box<settingsModel> settingsBox;
+  late final Upload upload = Upload();
+  late Box<tokenModel> tokenBox;
+  late bool autoupload;
+  late String _chosenValue;
+
+
+  @override
+  void initState() {
+    super.initState();
+    settingsBox = Hive.box<settingsModel>(settingsBoxName);
+    tokenBox = Hive.box<tokenModel>(tokenBoxName);
+    autoupload = settingsBox.get('settings')!.automatic;
+  _chosenValue = '144p';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +60,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
               child: Column(
                 children: <Widget>[
-                  ListTile(
-                    leading: Icon(Icons.high_quality),
-                    title: Text("Resolution"),
-                    trailing:  Icon(Icons.keyboard_arrow_down),
-                    onTap: (){
-
+                  // ListTile(
+                  //   leading: Icon(Icons.high_quality),
+                  //   title: Text("Resolution"),
+                  //   trailing:  Icon(Icons.keyboard_arrow_down),
+                  //   onTap: (){
+                  //
+                  //   },
+                  // ),
+                  DropdownButton<String>(
+                    focusColor:Colors.white,
+                    value: _chosenValue,
+                    //elevation: 5,
+                    style: TextStyle(color: Colors.white),
+                    iconEnabledColor:Colors.black,
+                    items: <String>[
+                      '144p',
+                      '240p',
+                      '480p',
+                      '720p',
+                      '1080p',
+                      '2080p',
+                      '4k',
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value,style:TextStyle(color:Colors.black),),
+                      );
+                    }).toList(),
+                    hint:Text(
+                      "Please choose a langauage",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    onChanged: (String? value) {
+                      setState(() {
+                        _chosenValue = '720p';
+                      });
                     },
                   ),
                   SwitchListTile(
@@ -53,10 +106,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     secondary: const Icon(Icons.lightbulb_outline),
                     contentPadding: const EdgeInsets.all(0),
                     title: Text("Automatic upload"),
-                    value: upload,
+                    value: autoupload,
                     onChanged: (bool value) {
                       setState(() {
-                        upload = value;
+                        autoupload = value;
+                        print("value --------------------- $value");
+                        if(value){
+                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true);
+                          settingsBox.put('settings', sm);
+                          print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
+
+                          upload.autoUpload();
+
+                        }
+                        else{
+                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false);
+                          settingsBox.put('settings', sm);
+                          print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
+
+                        }
                       });
                     },
 

@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:untitled/token_model.dart';
 import 'dart:async';
 
+import 'constants.dart';
 import 'main.dart';
 
 
@@ -18,12 +19,17 @@ class Upload {
   late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
   final int responseCode = 200;
+  late final constantFunctions constants = constantFunctions();
+  String? token;
+
 
   Upload() {
     // journey: implement initState
     // super.initState();
     journeyBox = Hive.box<journeyModel>(journeyBoxName);
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
+    token = tokenBox.get('token')?.token;
+
   }
   //Get Project Id (API call :- 2)
   Future<dynamic> getprojectid(String token,String name, journeyModel journey,int key) async {
@@ -117,6 +123,37 @@ class Upload {
       });
       return response.statusCode;
     });
+  }
+  Future<void> autoUpload() async {
+    if(token?.length!=0 && await constants.checkInternetConnection() ) {
+      List<int> keys;
+      keys = journeyBox.keys
+          .cast<int>()
+          .where((key) =>
+      !journeyBox.get(key)!.isVideoUploaded ||
+          !journeyBox.get(key)!.isCsvUploaded)
+          .toList();
+
+      for (int i = 0; i < keys.length; i++) {
+        journeyModel journey = journeyBox.get(keys[i])!;
+        bool videoUploaded = journey.isVideoUploaded;
+        bool csvUploaded = journey.isCsvUploaded;
+        if (journey.id.length == 0) {
+          await getprojectid(token!, journey.name, journey, keys[i]);
+        }
+        if (!journey.isCsvUploaded) {
+          await uploadCsvToServer(
+              token!, journey.csvPath, journey, keys[i], journey.id);
+        }
+        if (!journey.isVideoUploaded) {
+          await uploadVideoToServer(
+              token!, journey.videoPath, journey, keys[i], journey.id);
+        }
+        print(
+            "$videoUploaded ---------- $csvUploaded");
+      }
+    }
+
   }
 
 

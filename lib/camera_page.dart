@@ -84,7 +84,7 @@ class _CameraPageState extends State<CameraPage> {
   late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
 
-  late final Upload upload;
+  late final Upload upload = Upload();
   late final constantFunctions constants = constantFunctions();
 
 
