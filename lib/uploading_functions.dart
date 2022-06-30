@@ -17,6 +17,7 @@ class Upload {
   String? serverIpAddress='http://15.206.73.160:8081/api';
   late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
+  final int responseCode = 200;
 
   Upload() {
     // journey: implement initState
@@ -41,7 +42,7 @@ class Upload {
     print( '----------------------:::::::::::::::::::::::::-----------'+body['_id'].toString());
     // setState(() => projectid = body['_id']);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == responseCode) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
       projectid = body['_id'];
@@ -72,7 +73,7 @@ class Upload {
 
     return request.send().then((response) {
       print(':;;;;;;;;;;;;;;statuscode-video    ' + response.statusCode.toString());
-      if(response.statusCode==200){
+      if(response.statusCode==responseCode){
         journey.isVideoUploaded = !journey.isVideoUploaded;
         journeyBox.put(key, journey);
       }
@@ -100,7 +101,7 @@ class Upload {
     request.files.add(await http.MultipartFile.fromPath('csv', Csvpath,filename: '$projectid' + 'new.csv',contentType: MediaType('application', 'vnd.ms-excel')));
     request.send().then((response) {
       print(':;;;;;;;;;;;;;;;;;statuscode-csv    ' + response.statusCode.toString());
-      if(response.statusCode==200){
+      if(response.statusCode==responseCode){
         journey.isCsvUploaded = !journey.isCsvUploaded;
         journeyBox.put(key, journey);
 

@@ -140,7 +140,7 @@ class _LoginDemoState extends State<LoginDemo> {
     // print('--------------------------------------'+ projectid.toString());
     // print('--------------------------------------'+ body.toString());
     if (response.statusCode == 200) {
-      // If the server did return a 201 CREATED response,
+      // If the server did return a 200 CREATED response,
       // then parse the JSON.
       print('--------------------------------------token:'+ body['data']['token'].toString());
       setState(() => token = body['data']['token']);
@@ -238,6 +238,8 @@ class _LoginDemoState extends State<LoginDemo> {
                 //journey skip
 
                 print('token at login page:- ${tokenBox.length}----------------------------------');
+                tokenModel tm = tokenModel(token: "");
+                tokenBox.put('token', tm);
                 Navigator.push(
                     context, MaterialPageRoute(builder: (context) => startJourneyScreen()));
               },

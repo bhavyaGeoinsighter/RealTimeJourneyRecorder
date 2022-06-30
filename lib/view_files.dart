@@ -33,13 +33,17 @@ enum journeyFilter { ALL, VIDEO_UPLOADED, VIDEO_NOT_UPLOADED, CSV_UPLOADED, CSV_
 
 class _MyHomePageState extends State<Database> {
   final GlobalKey<ExpansionTileCardState> cardA = new GlobalKey();
-  late final Upload upload;
+  late final Upload upload = Upload();
+  late final constantFunctions constants = constantFunctions();
+
+  //Databases
   late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
 
   //api token
   String? token;
 
+  //uploads filters
   journeyFilter filter = journeyFilter.ALL;
 
   @override
@@ -175,19 +179,20 @@ class _MyHomePageState extends State<Database> {
                           setState(() {
                             // journeyBox.delete(key);
                             print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
+                            //Deleting both the files
                             journeyBox.deleteAt(index);
                             File videoFile = File(journey.videoPath);
                             videoFile.delete();
                             File csvFile = File(journey.csvPath);
                             csvFile.delete();
-
-
                             print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
                           });
 
-                          Scaffold.of(context).showSnackBar(SnackBar(
-                            backgroundColor: Colors.red,
-                              content: Text("${journey.name} deleted",)));
+                          constants.snackbar(context,"${journey.name} deleted", Colors.red);
+
+                          // Scaffold.of(context).showSnackBar(SnackBar(
+                          //   backgroundColor: Colors.red,
+                          //     content: Text("${journey.name} deleted",)));
                         }),
 
                         // All actions are defined in the children parameter.
@@ -276,41 +281,50 @@ class _MyHomePageState extends State<Database> {
                                           BorderRadius.circular(4.0)),
                                     onPressed: ( !journey.isVideoUploaded && !journey.isCsvUploaded) // if token is valid then only button is enabled.
                                         ? () async => {
-                                    if(tokenBox.get('token')?.token.length==0){
-                                      Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text(" Please sign in."))),
-                                    },
-                                          print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
-                                          print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                          print("${journey.id} ----- id;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                      if( !await constants.checkInternetConnection()){
+                                        constants.snackbar(context, "Please check your Internet Connection and try again!", Colors.black),
+                                      },
+                                      if(tokenBox.get('token')?.token.length==0 && await constants.checkInternetConnection() ){
+                                      constants.snackbar(context," Please sign in.", null),
+                                      // Scaffold.of(context).showSnackBar(const SnackBar(
+                                      //     content: Text(" Please sign in."))),
+                                      },
+                                          // print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
+                                          // print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                          // print("${journey.id} ----- id;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                          // upload = Upload(),
+                                          // snackbar = showSnackbar(),
 
-                                          upload = Upload(),
-                                          if(journey.id.length==0){
+
+                                      if(journey.id.length==0){
                                           await upload.getprojectid(token!,journey.name,journey,key),
-                                          },
+                                      },
 
                                       if(!journey.isCsvUploaded){
                                         print("${journey.id}  ---- ${journey.name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-
-                                        Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text("${journey.name} CSV UPLOADING"))),
+                                        constants.snackbar(context,"${journey.name} CSV UPLOADING",null),
+                                        // Scaffold.of(context).showSnackBar(SnackBar(
+                                        //     content: Text("${journey.name} CSV UPLOADING"))),
                                         await upload.uploadCsvToServer(token!,journey.csvPath,journey,key,journey.id).then((statusCode) => {
                                           // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                          Scaffold.of(context).showSnackBar(SnackBar(
-                                              content: Text("${journey.name} CSV UPLOADED")))
+                                          constants.snackbar(context, "${journey.name} CSV UPLOADED", null),
+                                          // Scaffold.of(context).showSnackBar(SnackBar(
+                                          //     content: Text("${journey.name} CSV UPLOADED")))
                                         }),
                                       },
                                       if(!journey.isVideoUploaded){
                                         print("${journey.id}  ---- ${journey.name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                        constants.snackbar(context, "${journey.name} VIDEO UPLOADING", null),
+                                        // Scaffold.of(context).showSnackBar(SnackBar(
+                                        // content: Text("${journey.name} VIDEO UPLOADING"))),
 
-                                        Scaffold.of(context).showSnackBar(SnackBar(
-                                          content: Text("${journey.name} VIDEO UPLOADING"))),
                                         await upload.uploadVideoToServer(token!,journey.videoPath,journey,key,journey.id).then((statusCode) => {
                                         print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                        Scaffold.of(context).showSnackBar(SnackBar(
-                                        content: Text("${journey.name} VIDEO UPLOADED")))
+                                          constants.snackbar(context, "${journey.name} VIDEO UPLOADED", null),
+                                        //  Scaffold.of(context).showSnackBar(SnackBar(
+                                        // content: Text("${journey.name} VIDEO UPLOADED")))
                                       }),},
-                                      // print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                        // print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                     }
                                         : null,
 
@@ -322,7 +336,6 @@ class _MyHomePageState extends State<Database> {
                                             vertical: 2.0),
                                       ),
                                       Text('Upload'),
-
                                       Text('Video & Csv'),
                                     ],
                                   ),

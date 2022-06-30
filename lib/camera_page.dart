@@ -21,6 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:untitled/view_files.dart';
 
 
+import 'constants.dart';
 import 'main.dart';
 // import 'package:location/location.dart' as loc;
 
@@ -84,6 +85,8 @@ class _CameraPageState extends State<CameraPage> {
   late Box<tokenModel> tokenBox;
 
   late final Upload upload;
+  late final constantFunctions constants = constantFunctions();
+
 
   @override
   void initState() {
@@ -366,9 +369,8 @@ class _CameraPageState extends State<CameraPage> {
 
 
 
-
-
   _initCamera() async {
+    //Dynamic Settings to be added with settings
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []); //hiding device status bar which is visible on top
     final cameras = await availableCameras();
     final front = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.back);
@@ -427,20 +429,32 @@ class _CameraPageState extends State<CameraPage> {
       //  Navigator.push(context, route);
       Navigator.pop(context);
 
-      upload = Upload();
-      try {
-        final result = await InternetAddress.lookup('example.com');
-        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          print('connected');
-          // print('name, path, description ------- '+ journey.name+ '--------'+ journey.videoPath + '-----'+journey.description);
-          await upload.getprojectid(token!,journey.name,journey,keyOfCurrjourney);
-          await upload.uploadCsvToServer(token!,journey.csvPath,journey,keyOfCurrjourney,journey.id);
-          await upload.uploadVideoToServer(token!,journey.videoPath,journey,keyOfCurrjourney,journey.id);
+      // upload = Upload();
+      // try {
+      //   final result = await InternetAddress.lookup('example.com');
+      //   if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      //     print('connected');
+      //     // print('name, path, description ------- '+ journey.name+ '--------'+ journey.videoPath + '-----'+journey.description);
+      //
 
-        }
-      } on SocketException catch (_) {
-        print('not connected');
+      //check internet connection and manual or automatic from settings database.
+      if(await constants.checkInternetConnection()) {
+        await upload.getprojectid(
+            token!, journey.name, journey, keyOfCurrjourney);
+        await upload.uploadCsvToServer(
+            token!, journey.csvPath, journey, keyOfCurrjourney, journey.id);
+        await upload.uploadVideoToServer(
+            token!, journey.videoPath, journey, keyOfCurrjourney, journey.id);
       }
+      else{
+        print("No Internet Connection");
+      }
+      //   }
+      // } on SocketException catch (_) {
+      //   // snackbar.snackbar(context, "${journey.name} Upload can't be uinitiated. Please turn on your Internet.", Colors.white);
+      //   print('not connected');
+      //
+      // }
     } else {
       // file =  await _localFile;
       print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'+name.toString()+ ';;;;;;;;;;;'+ description.toString() );

@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:untitled/camera_page.dart';
 import 'package:untitled/journey_model.dart';
+import 'package:untitled/settings.dart';
 import 'package:untitled/view_files.dart';
 
 class startJourneyScreen extends StatefulWidget {
@@ -16,6 +17,9 @@ class startJourneyScreen extends StatefulWidget {
 class _startJourneyScreen extends State<startJourneyScreen> {
   TextEditingController name = TextEditingController();
   TextEditingController desciption = TextEditingController();
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +143,28 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                             ),
                             const Text(
                               'View Recordings',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: const Color(0xff4c505b),
+                              child: IconButton(
+                                color: Colors.white,
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                          builder: (context) =>
+                                          const SettingsScreen()));
+                                },
+                                icon: const Icon(Icons.settings),
+                              ),
+                            ),
+                            const Text(
+                              'Settings',
                               style: TextStyle(
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w600,
