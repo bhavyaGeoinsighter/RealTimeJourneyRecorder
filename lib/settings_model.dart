@@ -6,9 +6,9 @@ part 'settings_model.g.dart';
 @HiveType(typeId: 2)
 class settingsModel {
   @HiveField(0)
-  late final String resolution;
+  late String resolution = '720p';
   @HiveField(1)
-  late final bool automatic;
+  late bool automatic = false;
 
   settingsModel({required this.resolution,required this.automatic});
 

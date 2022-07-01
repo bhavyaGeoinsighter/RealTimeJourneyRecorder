@@ -125,7 +125,9 @@ class Upload {
     });
   }
   Future<void> autoUpload() async {
-    if(token?.length!=0 && await constants.checkInternetConnection() ) {
+    print(token!.length.toString()+'-------------------------------------------');
+
+    if(tokenBox.get('token')?.token.toString().length!=0 && await constants.checkInternetConnection() ) {
       List<int> keys;
       keys = journeyBox.keys
           .cast<int>()

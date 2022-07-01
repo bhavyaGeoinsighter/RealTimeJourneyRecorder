@@ -10,6 +10,7 @@ import 'package:hive/hive.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:location/location.dart';
 import 'package:untitled/journey_model.dart';
+import 'package:untitled/settings_model.dart';
 import 'package:untitled/token_model.dart';
 import 'package:untitled/uploading_functions.dart';
 import 'package:untitled/video_page.dart';
@@ -83,6 +84,8 @@ class _CameraPageState extends State<CameraPage> {
   bool isFlashModeOn = true;
   late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
+  late Box<settingsModel> settingsBox;
+
 
   late final Upload upload = Upload();
   late final constantFunctions constants = constantFunctions();
@@ -93,6 +96,7 @@ class _CameraPageState extends State<CameraPage> {
     super.initState();
     journeyBox = Hive.box<journeyModel>(journeyBoxName);
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
+    settingsBox = Hive.box<settingsModel>(settingsBoxName);
 
     setState(() => token = tokenBox.get('token')?.token);
     _initCamera();
@@ -367,14 +371,29 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
-
+  ResolutionPreset resolution(){
+    if(settingsBox.get('settings')!.resolution.toString()=="240p"){
+      return ResolutionPreset.low;
+    }
+    else if(settingsBox.get('settings')!.resolution.toString()=="480p"){
+      return ResolutionPreset.medium;
+    }
+    else if(settingsBox.get('settings')!.resolution.toString()=="720p"){
+      return ResolutionPreset.high;
+    }else if(settingsBox.get('settings')!.resolution.toString()=="1080p"){
+      return ResolutionPreset.veryHigh;
+    }else if(settingsBox.get('settings')!.resolution.toString()=="2160p"){
+      return ResolutionPreset.ultraHigh;
+    }
+    return ResolutionPreset.max;
+  }
 
   _initCamera() async {
     //Dynamic Settings to be added with settings
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []); //hiding device status bar which is visible on top
     final cameras = await availableCameras();
     final front = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.back);
-    _cameraController = CameraController(cameras[0], ResolutionPreset.high);
+    _cameraController = CameraController(cameras[0], resolution());
     await _cameraController.initialize();
     setState(() => _isLoading = false);
   }
@@ -438,7 +457,7 @@ class _CameraPageState extends State<CameraPage> {
       //
 
       //check internet connection and manual or automatic from settings database.
-      if(await constants.checkInternetConnection()) {
+      if(await constants.checkInternetConnection() && settingsBox.get('settings')!.automatic) {
         await upload.getprojectid(
             token!, journey.name, journey, keyOfCurrjourney);
         await upload.uploadCsvToServer(

@@ -100,6 +100,18 @@ class _MyHomePageState extends State<Database> {
                     // filter = journeyFilter.COMPLETED;
                     tokenModel tm = tokenModel(token: "");
                     tokenBox.put('token', tm);
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                        builder: (context) => LoginDemo()),(Route route) => false);
+                    print('token after logout:- ${tokenBox.get('token')?.token}----------------------------------');
+
+                  });
+                } else if (value.compareTo("Login") == 0) {
+                  setState(() {
+                    // filter = journeyFilter.COMPLETED;
+                    tokenModel tm = tokenModel(token: "");
+                    tokenBox.put('token', tm);
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                        builder: (context) => LoginDemo()),(Route route) => false);
                     print('token after logout:- ${tokenBox.get('token')?.token}----------------------------------');
 
                   });
@@ -111,13 +123,38 @@ class _MyHomePageState extends State<Database> {
                 // }
               },
               itemBuilder: (BuildContext context) {
-                return ["All", "Video Uploaded", "Video Not Uploaded","Csv Uploaded","Csv Not Uploaded", "Logout"]
-                    .map((option) {
-                  return PopupMenuItem(
-                    value: option,
-                    child: Text(option),
-                  );
-                }).toList();
+                if(tokenBox.get('token')?.token.toString().length!=0) {
+                  return [
+                    "All",
+                    "Video Uploaded",
+                    "Video Not Uploaded",
+                    "Csv Uploaded",
+                    "Csv Not Uploaded",
+                    "Logout"
+                  ]
+                      .map((option) {
+                    return PopupMenuItem(
+                      value: option,
+                      child: Text(option),
+                    );
+                  }).toList();
+                }
+                else{
+                  return [
+                    "All",
+                    "Video Uploaded",
+                    "Video Not Uploaded",
+                    "Csv Uploaded",
+                    "Csv Not Uploaded",
+                    "Login"
+                  ]
+                      .map((option) {
+                    return PopupMenuItem(
+                      value: option,
+                      child: Text(option),
+                    );
+                  }).toList();
+                }
               },
             )
           ],
@@ -175,7 +212,29 @@ class _MyHomePageState extends State<Database> {
                         motion: const ScrollMotion(),
 
                         // A pane can dismiss the Slidable.
-                        dismissible: DismissiblePane(onDismissed: () {
+                        dismissible: DismissiblePane(
+                            confirmDismiss: () async {
+                              return await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Confirm"),
+                                    content: const Text("Are you sure you wish to delete this item?"),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                          onPressed: () => Navigator.of(context).pop(true),
+                                          child: const Text("DELETE")
+                                      ),
+                                      FlatButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text("CANCEL"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            onDismissed: () {
                           setState(() {
                             // journeyBox.delete(key);
                             print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');

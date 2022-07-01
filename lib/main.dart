@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      home: LoginDemo(),
+      home: MyHomePage(),
 
     );
   }
@@ -64,53 +64,69 @@ class MyApp extends StatelessWidget {
 
 // Splash Screen (Not needed)
 
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({Key key,  this.title}) : super(key: key);
-//   final String title;
-//
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-//
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key key,  this.title}) : super(key: key);
+  final String title;
 
-// class _MyHomePageState extends State<MyHomePage> {
-//   void initState() {
-//     super.initState();
-//     Timer(Duration(seconds: 3),
-//             ()=>Navigator.pushReplacement(context,
-//             MaterialPageRoute(builder:
-//                 (context) =>
-//                 LoginDemo()
-//             )
-//         )
-//     );
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//         decoration: const BoxDecoration(
-//           image: DecorationImage(
-//               image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
-//         ),
-//         child: Scaffold(
-//             backgroundColor: Colors.transparent,
-//             body: Stack(children: [
-//               Container(
-//                 child: const Text(
-//                   'RealTime - JourneyRecorder',
-//
-//                   style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
-//
-//                 ),
-//               )
-//             ],
-//             )
-//         )
-//     );
-//   }
-// }
-//
-//
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+
+class _MyHomePageState extends State<MyHomePage> {
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 3),
+            ()=>
+        //     Navigator.pushReplacement(context,
+        //     MaterialPageRoute(builder:
+        //         (context) =>
+        //         LoginDemo()
+        //     )
+        // )
+      loginScreen()
+    );
+  }
+  void loginScreen(){
+    // print("hello");
+    if(12%2==0) {
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder:
+              (context) =>
+              LoginDemo()
+          )
+      );
+    }
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
+        ),
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(children: [
+              Container(
+                child: const Text(
+                  'RealTime - JourneyRecorder',
+
+                  style: TextStyle(color: Colors.white, fontSize: 40,fontWeight: FontWeight.w800),
+
+                ),
+              )
+            ],
+            )
+        )
+    );
+  }
+}
+
+
 
 
 
@@ -150,8 +166,9 @@ class _LoginDemoState extends State<LoginDemo> {
       // If the server did return a 200 CREATED response,
       // then parse the JSON.
       print('--------------------------------------token:'+ body['data']['token'].toString());
-      setState(() => token = body['data']['token']);
-      tokenModel tm = tokenModel(token: token);
+      // if (mounted) {
+        setState(() => token = body['data']['token']);
+      tokenModel tm = tokenModel(token: body['data']['token']);
       tokenBox.put('token', tm);
       // token = body['data']['token'];
 
@@ -179,7 +196,7 @@ class _LoginDemoState extends State<LoginDemo> {
               child: Center(
                 child: Container(
                     width: 200,
-                    height: 150,
+                    height: 140,
                     /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
@@ -224,10 +241,11 @@ class _LoginDemoState extends State<LoginDemo> {
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
-                onPressed: () {
-                  gettoken();
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => startJourneyScreen()));
+                onPressed: () async {
+                  await gettoken();
+                  print(tokenBox.get('token').token+'------------------token');
+                  await Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                      builder: (context) => startJourneyScreen()),(Route route) => false);
                 },
 
                 child: const Text(
@@ -237,7 +255,7 @@ class _LoginDemoState extends State<LoginDemo> {
               ),
             ),
 
-            SizedBox(
+            const SizedBox(
               height: 130,
             ),
             FlatButton(
@@ -247,8 +265,10 @@ class _LoginDemoState extends State<LoginDemo> {
                 print('token at login page:- ${tokenBox.length}----------------------------------');
                 tokenModel tm = tokenModel(token: "");
                 tokenBox.put('token', tm);
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => startJourneyScreen()));
+                print(tokenBox.get('token')?.token.toString().length );
+
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                    builder: (context) => startJourneyScreen()),(Route route) => false);
               },
               child: const Text(
                 'skip',

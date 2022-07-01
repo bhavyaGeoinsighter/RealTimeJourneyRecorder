@@ -27,7 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     settingsBox = Hive.box<settingsModel>(settingsBoxName);
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
     autoupload = settingsBox.get('settings')!.automatic;
-  _chosenValue = '144p';
+  _chosenValue = settingsBox.get('settings')!.resolution;
   }
 
   @override
@@ -60,14 +60,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
               child: Column(
                 children: <Widget>[
-                  // ListTile(
-                  //   leading: Icon(Icons.high_quality),
-                  //   title: Text("Resolution"),
-                  //   trailing:  Icon(Icons.keyboard_arrow_down),
-                  //   onTap: (){
-                  //
-                  //   },
-                  // ),
+                  ListTile(
+                    leading: Icon(Icons.high_quality),
+                    title: Text("Resolution"),
+                    trailing:  Icon(Icons.keyboard_arrow_down),
+                    onTap: (){
+
+                    },
+                  ),
                   DropdownButton<String>(
                     focusColor:Colors.white,
                     value: _chosenValue,
@@ -75,12 +75,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: TextStyle(color: Colors.white),
                     iconEnabledColor:Colors.black,
                     items: <String>[
-                      '144p',
+                      // '144p',
                       '240p',
                       '480p',
                       '720p',
                       '1080p',
-                      '2080p',
+                      '2160p',
                       '4k',
                     ].map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
@@ -88,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Text(value,style:TextStyle(color:Colors.black),),
                       );
                     }).toList(),
-                    hint:Text(
+                    hint:const Text(
                       "Please choose a langauage",
                       style: TextStyle(
                           color: Colors.black,
@@ -97,7 +97,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onChanged: (String? value) {
                       setState(() {
-                        _chosenValue = '720p';
+                        _chosenValue = value!;
+                        settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic);
+                        settingsBox.put('settings', sm);
+                        print(settingsBox.get('settings')!.resolution.toString()+"------------new resolution");
                       });
                     },
                   ),

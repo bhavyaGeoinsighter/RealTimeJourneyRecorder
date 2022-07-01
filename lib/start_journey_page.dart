@@ -43,6 +43,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
     // settingsModel sm = settingsModel(resolution: "720p", automatic: true);
     // settingsBox.put("settings", sm);
     // settingsBox.put('settings', )
+    print('upoloading--------------------------------------------');
 
     //autoUpload if Internet is connected and automatic upload is true from settings.
     if(settingsBox.length==0){
@@ -50,6 +51,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
       settingsBox.put('settings', sm);
     }
     if(settingsBox.length!=0 && settingsBox.get('settings')!.automatic) {
+      print(settingsBox.get('settings')!.automatic.toString()+'-------------------------------------------');
       upload.autoUpload();
     }
 
@@ -84,6 +86,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                       color: Colors.white,
                       fontSize: 60,
                       fontWeight: FontWeight.w800)),
+
             ),
           ),
           SingleChildScrollView(
@@ -162,6 +165,9 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w600,
                               ),
+                            ),
+                            Container(
+                              height: 10,
                             ),
                           ],
                         ),
