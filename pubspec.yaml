@@ -29,15 +29,15 @@ environment:
 dependencies:
   http:
   http_parser:
-  dio:
+#  dio:
   path_provider:
-  permission_handler:
+  permission_handler: 9.2.0
   flutter:
     sdk: flutter
   camera: ^0.9.4+3
   video_player: ^2.2.6
-  geolocator: #latest version
-  geocoding:
+#  geolocator: #latest version
+#  geocoding:
   intl:
   fluttertoast:
   location:
@@ -45,7 +45,8 @@ dependencies:
   hive_flutter:
   flutter_slidable:
   expansion_tile_card:
-  shared_preferences:
+#  shared_preferences:
+#  raw_gnss:
   #  hive_generator:
 #  build_runner:
 

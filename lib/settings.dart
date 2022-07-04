@@ -19,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late Box<tokenModel> tokenBox;
   late bool autoupload;
   late String _chosenValue;
+  late bool isSkipped = tokenBox.get('token')?.token.toString().length==0;
 
 
   @override
@@ -28,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
     autoupload = settingsBox.get('settings')!.automatic;
   _chosenValue = settingsBox.get('settings')!.resolution;
+    isSkipped = tokenBox.get('token')?.token.toString().length==0;
   }
 
   @override
@@ -52,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: CircleAvatar(
                   // backgroundImage:,
                 ),
-                trailing: Icon(Icons.edit),
+                trailing: Icon(Icons.railway_alert_outlined),
               ),
             ),
             const SizedBox(height: 10.0,),
@@ -60,15 +62,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
               child: Column(
                 children: <Widget>[
-                  ListTile(
-                    leading: Icon(Icons.high_quality),
-                    title: Text("Resolution"),
-                    trailing:  Icon(Icons.keyboard_arrow_down),
-                    onTap: (){
+                  // ListTile(
+                  //   leading: Icon(Icons.high_quality),
+                  //   title: Text("Resolution"),
+                  //   trailing:  Icon(Icons.keyboard_arrow_down),
+                  //   onTap: (){
+                  //
+                  //   },
+                  // ),
+                  Row(
+              children: <Widget>[
+                  Icon(Icons.high_quality),
+                Text("         "),
 
-                    },
-                  ),
-                  DropdownButton<String>(
+                Text("Resolution", style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400),),
+                Text("      "),
+
+                DropdownButton<String>(
                     focusColor:Colors.white,
                     value: _chosenValue,
                     //elevation: 5,
@@ -103,36 +116,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         print(settingsBox.get('settings')!.resolution.toString()+"------------new resolution");
                       });
                     },
+                  ),]
                   ),
-                  SwitchListTile(
-                    activeColor: Colors.purple,
-                    secondary: const Icon(Icons.lightbulb_outline),
-                    contentPadding: const EdgeInsets.all(0),
-                    title: Text("Automatic upload"),
-                    value: autoupload,
-                    onChanged: (bool value) {
-                      setState(() {
-                        autoupload = value;
-                        print("value --------------------- $value");
-                        if(value){
-                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true);
-                          settingsBox.put('settings', sm);
-                          print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
+                  IgnorePointer(
+                    ignoring: isSkipped,
+                    child: SwitchListTile(
+                      tileColor: isSkipped ? Colors.grey : Colors.white,
+                      activeColor: Colors.purple,
+                      secondary: const Icon(Icons.lightbulb_outline),
+                      contentPadding: const EdgeInsets.all(0),
+                      title: Text("Automatic upload"),
+                      value: autoupload,
+                      onChanged: (bool value) {
+                        setState(() {
+                          autoupload = value;
+                          print("value --------------------- $value");
+                          if(value){
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true);
+                            settingsBox.put('settings', sm);
+                            print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
 
-                          upload.autoUpload();
+                            upload.autoUpload();
 
-                        }
-                        else{
-                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false);
-                          settingsBox.put('settings', sm);
-                          print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
+                          }
+                          else{
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false);
+                            settingsBox.put('settings', sm);
+                            print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
 
-                        }
-                      });
-                    },
+                          }
+                        });
+                      },
 
 
+                    ),
                   ),
+                  // ListTile(
+                  //   leading: Icon(Icons.high_quality),
+                  //   title: Text("Resolution"),
+                  //   trailing:  Icon(Icons.keyboard_arrow_down),
+                  //   onTap: (){
+                  //
+                  //   },
+                  // ),
                 ],
               ),
 

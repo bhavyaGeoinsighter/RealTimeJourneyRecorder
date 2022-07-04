@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled/camera_page.dart';
 import 'package:untitled/settings_model.dart';
 import 'package:untitled/start_journey_page.dart';
@@ -16,6 +16,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+
+import 'constants.dart';
 
 
 const String journeyBoxName = "journey3";
@@ -84,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         //         LoginDemo()
         //     )
         // )
-      loginScreen()
+        loginScreen()
     );
   }
   void loginScreen(){
@@ -106,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-              image: AssetImage('assets/train.jpg'), fit: BoxFit.cover,opacity: 0.9),
+              image: AssetImage('assets/train.jpg'), fit: BoxFit.cover),
         ),
         child: Scaffold(
             backgroundColor: Colors.transparent,
@@ -140,6 +142,8 @@ class _LoginDemoState extends State<LoginDemo> {
   Box<tokenModel> tokenBox;
   String serverIpAddress='http://15.206.73.160:8081/api';
   String token;
+  final constantFunctions constants = constantFunctions();
+
 
   @override
   void initState() {
@@ -167,7 +171,7 @@ class _LoginDemoState extends State<LoginDemo> {
       // then parse the JSON.
       print('--------------------------------------token:'+ body['data']['token'].toString());
       // if (mounted) {
-        setState(() => token = body['data']['token']);
+      setState(() => token = body['data']['token']);
       tokenModel tm = tokenModel(token: body['data']['token']);
       tokenBox.put('token', tm);
       // token = body['data']['token'];
@@ -186,8 +190,9 @@ class _LoginDemoState extends State<LoginDemo> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Login Page"),
+        title: Text("Login"),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -195,12 +200,13 @@ class _LoginDemoState extends State<LoginDemo> {
               padding: const EdgeInsets.only(top: 60.0),
               child: Center(
                 child: Container(
-                    width: 200,
+                    width: 500,
                     height: 140,
                     /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
                     child: Image.asset('assets/earth.jpg')),
+
               ),
             ),
             const Padding(
@@ -230,7 +236,7 @@ class _LoginDemoState extends State<LoginDemo> {
               onPressed: (){
                 //journey FORGOT PASSWORD SCREEN GOES HERE
               },
-              child: Text(
+              child: const Text(
                 'Forgot Password',
                 style: TextStyle(color: Colors.blue, fontSize: 15),
               ),
@@ -242,10 +248,44 @@ class _LoginDemoState extends State<LoginDemo> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
                 onPressed: () async {
-                  await gettoken();
                   print(tokenBox.get('token').token+'------------------token');
-                  await Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
-                      builder: (context) => startJourneyScreen()),(Route route) => false);
+                  if(!await constants.checkInternetConnection()){
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                          elevation: 16,
+                          child: Container(
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: <Widget>[
+                                SizedBox(height: 20),
+                                Center(child: Text('Please check your Internet Connection')),
+                                SizedBox(height: 20),
+                              TextButton(
+                          child: Text("OK"),
+                          onPressed: () { Navigator.pop(context);},
+                        ),
+                                TextButton(
+                                  child: Text("Skip"),
+                                  onPressed: () {                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+                                      builder: (context) => startJourneyScreen()),(Route route) => false);},
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  else {
+                    await gettoken();
+                    await Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (context) => startJourneyScreen()), (
+                        Route route) => false);
+                  }
                 },
 
                 child: const Text(
@@ -282,4 +322,3 @@ class _LoginDemoState extends State<LoginDemo> {
     );
   }
 }
-

@@ -16,7 +16,7 @@ import 'package:untitled/uploading_functions.dart';
 import 'package:untitled/video_page.dart';
 // import 'package:geocoding/geocoding.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:untitled/view_files.dart';
@@ -133,14 +133,14 @@ class _CameraPageState extends State<CameraPage> {
   // Not used (Testing purpose forged with timer)
   _gpsforged() async {
 
-    final file = await _localFile2;
-    var dt = DateTime.now();
-    Position position = await Geolocator.getCurrentPosition();
-    String latitude = position.latitude.toString();
-    String longitude = position.longitude.toString();
-    String currTime = dt.toUtc().toString();
-    String accuracy  = position.accuracy.toString();
-    file.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
+    // final file = await _localFile2;
+    // var dt = DateTime.now();
+    // Position position = await Geolocator.getCurrentPosition();
+    // String latitude = position.latitude.toString();
+    // String longitude = position.longitude.toString();
+    // String currTime = dt.toUtc().toString();
+    // String accuracy  = position.accuracy.toString();
+    // file.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
 
   }
 
@@ -177,18 +177,18 @@ class _CameraPageState extends State<CameraPage> {
     }
 
     _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.DENIED) {
+    if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.GRANTED) {
+      if (_permissionGranted != PermissionStatus.granted) {
         return;
       }
     }
     final csvFile =  await _localFile;
 
-    LocationData locationData;
+    // LocationData locationData;
     // _locationData = await location.getLocation();
-    await location.changeSettings(interval: 0);
-    gpsLocationStream = location.onLocationChanged().listen((LocationData currentLocation) {
+    await location.changeSettings(interval: 1000);
+    gpsLocationStream = location.onLocationChanged.listen((LocationData currentLocation) {
       var dt = DateTime.now();
       String latitude = currentLocation.latitude.toString();
       String longitude = currentLocation.longitude.toString();
@@ -297,7 +297,7 @@ class _CameraPageState extends State<CameraPage> {
               padding: const EdgeInsets.all(25),
               child: FloatingActionButton(
                 backgroundColor: Colors.red,
-                child: Icon(_isRecording ? Icons.stop : Icons.circle),
+                child: Icon(_isRecording ? Icons.stop : Icons.emergency_recording,size: 36,),
                 onPressed: () => _recordVideo(),
               ),
             ),

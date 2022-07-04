@@ -147,15 +147,48 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                                 onPressed: () {
                                   String nametextToSend = name.text;
                                   String desctextToSend = desciption.text;
+                                  print(nametextToSend.toString()+ "-----------------------------------"+ desctextToSend.toString());
+                                  if(nametextToSend.toString().length==0){
+                                  showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                  return Dialog(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                                  elevation: 16,
+                                  child: Container(
+                                  child: ListView(
+                                  shrinkWrap: true,
+                                  children: <Widget>[
+                                  SizedBox(height: 20),
+                                  Center(child: Text('   Please enter your journey name')),
+                                  SizedBox(height: 20),
+                                  TextButton(
+                                  child: Text("OK"),
+                                  onPressed: () { Navigator.pop(context);},
+                                  ),
 
-                                  Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                          builder: (context) => CameraPage(
-                                                name: nametextToSend,
-                                                description: desctextToSend,
-                                              )));
-                                },
+                                  // _buildRow('assets/choc.png', 'Name 1', 1000),
+                                  // _buildRow('assets/choc.png', 'Name 2', 2000),
+                                  // _buildRow('assets/choc.png', 'Name 3', 3000),
+                                  // _buildRow('assets/choc.png', 'Name 4', 4000),
+                                  // _buildRow('assets/choc.png', 'Name 5', 5000),
+                                  // _buildRow('assets/choc.png', 'Name 6', 6000),
+                                  ],
+                                  ),
+                                  ),
+                                  );
+                                  },
+                                  );
+                                  }else {
+                                    Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                            builder: (context) =>
+                                                CameraPage(
+                                                  name: nametextToSend,
+                                                  description: desctextToSend,
+                                                )));
+                                  }},
                                 icon: const Icon(Icons.arrow_forward),
                               ),
                             ),

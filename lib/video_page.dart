@@ -36,14 +36,14 @@ class _VideoPageState extends State<VideoPage> {
         elevation: 0,
         backgroundColor: Colors.black26,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () {
-              // print(':::::::::::::::::::::::::::::::${widget.filePath}' );
-              var file = File(widget.filePath);
-              // print(':::::::::::::::::::::::::::::::::::${widget.filePath}:::::${file.lengthSync()}');
-            },
-          )
+          // IconButton(
+          //   icon: const Icon(Icons.check),
+          //   onPressed: () {
+          //     // print(':::::::::::::::::::::::::::::::${widget.filePath}' );
+          //     var file = File(widget.filePath);
+          //     // print(':::::::::::::::::::::::::::::::::::${widget.filePath}:::::${file.lengthSync()}');
+          //   },
+          // )
         ],
       ),
       extendBodyBehindAppBar: true,
