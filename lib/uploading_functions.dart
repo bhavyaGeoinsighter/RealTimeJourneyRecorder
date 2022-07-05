@@ -31,6 +31,43 @@ class Upload {
     token = tokenBox.get('token')?.token;
 
   }
+  Future<dynamic> checktoken(String token) async {
+    final response = await http.post(
+      Uri.parse('$serverIpAddress/railinsighter/validateToken'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+
+      },
+    );
+    final body = json.decode(response.body);
+    // setState(() =>
+    // projectid = body['data']['_id'].toString() //ProjectId
+    // );
+    // print('--------------------------------------'+ projectid.toString());
+    // print('--------------------------------------'+ body.toString());
+    print('--------------------------------------chech_token message:'+ body['message']);
+    print('--------------------------------------chech_token message:'+ body['message']);
+
+    if (response.statusCode == 200 ) {
+      // If the server did return a 200 CREATED response,
+      // then parse the JSON.
+      print('--------------------------------------body:'+ body.toString());
+      print('--------------------------------------response:'+ response.statusCode.toString());
+
+      // return true;
+
+      // return project.fromJson(jsonDecode(response.body));
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      print('--------------------------------------else:'+ body.toString());
+      throw Exception(body['message']);
+      print('--------------------------------------else body:'+ body.toString());
+
+      return false;
+    }
+  }
   //Get Project Id (API call :- 2)
   Future<dynamic> getprojectid(String token,String name, journeyModel journey,int key) async {
     final response = await http.post(

@@ -338,7 +338,7 @@ class _MyHomePageState extends State<Database> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(4.0)),
-                                    onPressed: ( !journey.isVideoUploaded && !journey.isCsvUploaded) // if token is valid then only button is enabled.
+                                    onPressed: ((!journey.isVideoUploaded && journey.isCsvUploaded) || (journey.isVideoUploaded && !journey.isCsvUploaded) || (!journey.isVideoUploaded && !journey.isCsvUploaded)) // if token is valid then only button is enabled.
                                         ? () async => {
                                       if( !await constants.checkInternetConnection()){
                                         constants.snackbar(context, "Please check your Internet Connection and try again!", Colors.black),
@@ -354,35 +354,59 @@ class _MyHomePageState extends State<Database> {
                                           // upload = Upload(),
                                           // snackbar = showSnackbar(),
 
+                                      if(await constants.checkInternetConnection()){
+                                        if(journey.id.length == 0){
+                                          await upload.getprojectid(
+                                              token!, journey.name, journey,
+                                              key),
+                                        },
 
-                                      if(journey.id.length==0){
-                                          await upload.getprojectid(token!,journey.name,journey,key),
-                                      },
-
-                                      if(!journey.isCsvUploaded){
-                                        print("${journey.id}  ---- ${journey.name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                        constants.snackbar(context,"${journey.name} CSV UPLOADING",null),
-                                        // Scaffold.of(context).showSnackBar(SnackBar(
-                                        //     content: Text("${journey.name} CSV UPLOADING"))),
-                                        await upload.uploadCsvToServer(token!,journey.csvPath,journey,key,journey.id).then((statusCode) => {
-                                          // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                          constants.snackbar(context, "${journey.name} CSV UPLOADED", null),
+                                        if(!journey.isCsvUploaded){
+                                          print("${journey.id}  ---- ${journey
+                                              .name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                          constants.snackbar(context,
+                                              "${journey.name} CSV UPLOADING",
+                                              null),
                                           // Scaffold.of(context).showSnackBar(SnackBar(
-                                          //     content: Text("${journey.name} CSV UPLOADED")))
-                                        }),
-                                      },
-                                      if(!journey.isVideoUploaded){
-                                        print("${journey.id}  ---- ${journey.name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                        constants.snackbar(context, "${journey.name} VIDEO UPLOADING", null),
-                                        // Scaffold.of(context).showSnackBar(SnackBar(
-                                        // content: Text("${journey.name} VIDEO UPLOADING"))),
+                                          //     content: Text("${journey.name} CSV UPLOADING"))),
+                                          await upload.uploadCsvToServer(
+                                              token!, journey.csvPath, journey,
+                                              key, journey.id).then((
+                                              statusCode) =>
+                                          {
+                                            // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                            constants.snackbar(context,
+                                                "${journey.name} CSV UPLOADED",
+                                                null),
+                                            // Scaffold.of(context).showSnackBar(SnackBar(
+                                            //     content: Text("${journey.name} CSV UPLOADED")))
+                                          }),
+                                        },
+                                        if(!journey.isVideoUploaded){
+                                          print("${journey.id}  ---- ${journey
+                                              .name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                          constants.snackbar(context,
+                                              "${journey.name} VIDEO UPLOADING",
+                                              null),
+                                          // Scaffold.of(context).showSnackBar(SnackBar(
+                                          // content: Text("${journey.name} VIDEO UPLOADING"))),
 
-                                        await upload.uploadVideoToServer(token!,journey.videoPath,journey,key,journey.id).then((statusCode) => {
-                                        print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                          constants.snackbar(context, "${journey.name} VIDEO UPLOADED", null),
-                                        //  Scaffold.of(context).showSnackBar(SnackBar(
-                                        // content: Text("${journey.name} VIDEO UPLOADED")))
-                                      }),},
+                                          await upload.uploadVideoToServer(
+                                              token!, journey.videoPath,
+                                              journey, key, journey.id).then((
+                                              statusCode) =>
+                                          {
+                                            print(
+                                                "$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                            constants.snackbar(context,
+                                                "${journey
+                                                    .name} VIDEO UPLOADED",
+                                                null),
+                                            //  Scaffold.of(context).showSnackBar(SnackBar(
+                                            // content: Text("${journey.name} VIDEO UPLOADED")))
+                                          }),
+                                        }
+                                      },
                                         // print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                     }
                                         : null,

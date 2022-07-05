@@ -73,13 +73,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Row(
               children: <Widget>[
                   Icon(Icons.high_quality),
-                Text("         "),
+                // Text("         "),
 
-                Text("Resolution", style: TextStyle(
+                const Text("         Resolution      ", style: TextStyle(
                     color: Colors.black,
                     fontSize: 15,
                     fontWeight: FontWeight.w400),),
-                Text("      "),
+                // Text("      "),
 
                 DropdownButton<String>(
                     focusColor:Colors.white,
@@ -125,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       activeColor: Colors.purple,
                       secondary: const Icon(Icons.lightbulb_outline),
                       contentPadding: const EdgeInsets.all(0),
-                      title: Text("Automatic upload"),
+                      title:isSkipped ? Text("Automatic upload (Please sign in to use)"): Text("Automatic upload"),
                       value: autoupload,
                       onChanged: (bool value) {
                         setState(() {
@@ -135,7 +135,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true);
                             settingsBox.put('settings', sm);
                             print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
-
                             upload.autoUpload();
 
                           }
