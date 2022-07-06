@@ -103,7 +103,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                     filled: true,
                     fillColor: Colors.white,
                     labelText: 'Jourey Name',
-                    hintText: 'Enter valid email id as abc@gmail.com'),
+                    hintText: ''),
               ),
               Container(
                 height: 12,
@@ -115,8 +115,10 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                     filled: true,
                     fillColor: Colors.white,
                     labelText: 'Journey Description',
-                    hintText: 'Enter valid email id as abc@gmail.com'),
+                    hintText: ''),
               ),
+              Container(height: 15,),
+              
               Container(
                 
                 child: Column(
@@ -164,6 +166,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                                         )));
                           }
                         },
+                        
 
                         child: const Text(
                           'Start a Journey',
