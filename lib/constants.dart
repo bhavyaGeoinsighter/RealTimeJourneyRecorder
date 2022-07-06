@@ -64,7 +64,8 @@ class constantFunctions {
 
 
   }
-  Future<dynamic> tokenPopup(String promptText,context) async{
+  Future<dynamic> tokenPopup(String promptText,context,bool skip) async{
+    print("$skip---------------------skipbool");
     showDialog(
       context: context,
       builder: (context) {
@@ -82,11 +83,12 @@ class constantFunctions {
                   child: Text("OK"),
                   onPressed: () { Navigator.pop(context);},
                 ),
-                TextButton(
+
+                (skip==true) ? TextButton(
                   child: Text("Skip"),
                   onPressed: () {                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
                       builder: (context) => startJourneyScreen()),(Route route) => false);},
-                ),
+                ):Container(),
               ],
             ),
           ),

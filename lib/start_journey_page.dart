@@ -1,6 +1,9 @@
+// import 'dart:html';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:untitled/camera_page.dart';
 import 'package:untitled/journey_model.dart';
@@ -76,9 +79,6 @@ class _startJourneyScreen extends State<startJourneyScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Column(children: [
-          Container(
-            height: 50,
-          ),
           Expanded(
             child: Padding(
               padding:const EdgeInsets.only(
@@ -125,10 +125,35 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                       icon: const Icon(Icons.settings,size: 30,),
                     ),
 
-                  ]),
+                  ]
+
+              ),
             ),
           ),
-          
+          StreamBuilder<LocationData>(
+            stream: Location().onLocationChanged,
+            builder: (context, location) {
+              return Container(
+                child: Column(
+                  children:  [
+                    Text("Location Accuracy:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600), ),
+                    (location.data!=null)?
+                    Text(location.data!.accuracy!.toStringAsFixed(2)+" m",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),):
+                    Container(
+                      child: Text(location.data.toString()),
+                    ),
+
+                  ],
+                ),
+
+
+              );
+            }
+          ),
+          Container(
+            height: 30,
+          ),
+
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 20,right: 20),
@@ -166,29 +191,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                         String desctextToSend = desciption.text;
                         print("$nametextToSend-----------------------------------$desctextToSend");
                         if(nametextToSend.toString().length==0){
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return Dialog(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-                                elevation: 16,
-                                child: Container(
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: <Widget>[
-                                      SizedBox(height: 20),
-                                      Center(child: Text('   Please enter your journey name')),
-                                      SizedBox(height: 20),
-                                      TextButton(
-                                        child: Text("OK"),
-                                        onPressed: () { Navigator.pop(context);},
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                       constants.tokenPopup("Enter a Journey name", context, false);
                         }else {
                           Navigator.push(
                               context,

@@ -275,7 +275,7 @@ class _LoginDemoState extends State<LoginDemo> {
                 child: TextField(
                   controller: email,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                      // border: OutlineInputBorder(),
                       filled: true,
                       fillColor: Colors.white,
                       labelText: 'Email',
@@ -290,7 +290,7 @@ class _LoginDemoState extends State<LoginDemo> {
                   controller: password,
                   obscureText: true,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                      // border: OutlineInputBorder(),
                       filled: true,
                       fillColor: Colors.white,
                       labelText: 'Password',
@@ -310,7 +310,7 @@ class _LoginDemoState extends State<LoginDemo> {
                     if(!await constants.checkInternetConnection()){
                       // print(email.text+"------------------email");
                       // print(password.text+"----------------password");
-                    constants.tokenPopup("conection error", context);
+                    constants.tokenPopup("conection error!", context,true);
                     }
                     else {
                       try {
@@ -321,7 +321,7 @@ class _LoginDemoState extends State<LoginDemo> {
                             Route route) => false);
                       }
                       catch (e) {
-                        constants.tokenPopup(e.toString(), context);
+                        constants.tokenPopup(e.toString(), context,true);
                       }
                       // await upload.checktoken(token);
                       // await Navigator.of(context).pushAndRemoveUntil(

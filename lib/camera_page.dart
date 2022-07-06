@@ -296,8 +296,8 @@ class _CameraPageState extends State<CameraPage> {
             Padding(
               padding: const EdgeInsets.all(25),
               child: FloatingActionButton(
-                backgroundColor: Colors.red,
-                child: Icon(_isRecording ? Icons.stop : Icons.emergency_recording,size: 36,),
+                backgroundColor:_isRecording? Colors.white:Colors.red,
+                child: Icon(_isRecording ? Icons.stop : Icons.play_arrow,size: 36,color: _isRecording? Colors.red:Colors.white,),
                 onPressed: () => _recordVideo(),
               ),
             ),

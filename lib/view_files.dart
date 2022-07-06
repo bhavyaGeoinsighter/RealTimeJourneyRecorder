@@ -201,228 +201,239 @@ class _MyHomePageState extends State<Database> {
                 final int key = keys[index];
                 final journeyModel journey = journeys.get(key)!;
                 // print('$key${journey.name};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
-                return Container(
-                  //height: 10,
-                  child: Slidable(
-                      // Specify a key if the Slidable is dismissible.
-                      key: UniqueKey(),
-                      // The start action pane is the one at the left or the top side.
-                      startActionPane: ActionPane(
-                        // A motion is a widget used to control how the pane animates.
-                        motion: const ScrollMotion(),
+                return Column(
+                  children: [
+                    Container(
+                      //height: 10,
+                      child: Slidable(
+                          // Specify a key if the Slidable is dismissible.
+                          key: UniqueKey(),
+                          // The start action pane is the one at the left or the top side.
+                          startActionPane: ActionPane(
+                            // A motion is a widget used to control how the pane animates.
+                            motion: const ScrollMotion(),
 
-                        // A pane can dismiss the Slidable.
-                        dismissible: DismissiblePane(
-                            confirmDismiss: () async {
-                              return await showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("Confirm"),
-                                    content: const Text("Are you sure you wish to delete this item?"),
-                                    actions: <Widget>[
-                                      FlatButton(
-                                          onPressed: () => Navigator.of(context).pop(true),
-                                          child: const Text("DELETE")
-                                      ),
-                                      FlatButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
-                                        child: const Text("CANCEL"),
-                                      ),
-                                    ],
+                            // A pane can dismiss the Slidable.
+                            dismissible: DismissiblePane(
+                                confirmDismiss: () async {
+                                  return await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Confirm"),
+                                        content: const Text("Are you sure you wish to delete this item?"),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                              onPressed: () => Navigator.of(context).pop(true),
+                                              child: const Text("DELETE")
+                                          ),
+                                          FlatButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: const Text("CANCEL"),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
-                            onDismissed: () {
-                          setState(() {
-                            // journeyBox.delete(key);
-                            print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
-                            //Deleting both the files
-                            journeyBox.deleteAt(index);
-                            File videoFile = File(journey.videoPath);
-                            videoFile.delete();
-                            File csvFile = File(journey.csvPath);
-                            csvFile.delete();
-                            print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
-                          });
+                                onDismissed: () {
+                              setState(() {
+                                // journeyBox.delete(key);
+                                print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
+                                //Deleting both the files
+                                journeyBox.deleteAt(index);
+                                File videoFile = File(journey.videoPath);
+                                videoFile.delete();
+                                File csvFile = File(journey.csvPath);
+                                csvFile.delete();
+                                print('${index};;;;;;;;;;;;;;;;;;;;;;;;;;;');
+                              });
 
-                          constants.snackbar(context,"${journey.name} deleted", Colors.red);
+                              constants.snackbar(context,"${journey.name} deleted", Colors.red);
 
-                          // Scaffold.of(context).showSnackBar(SnackBar(
-                          //   backgroundColor: Colors.red,
-                          //     content: Text("${journey.name} deleted",)));
-                        }),
+                              // Scaffold.of(context).showSnackBar(SnackBar(
+                              //   backgroundColor: Colors.red,
+                              //     content: Text("${journey.name} deleted",)));
+                            }),
 
-                        // All actions are defined in the children parameter.
-                        children: const [
-                          // A SlidableAction can have an icon and/or a label.
-                          SlidableAction(
-                            onPressed: null,
-                            backgroundColor: Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                          ),
-                        ],
-                      ),
-                      // The end action pane is the one at the right or the bottom side.
-
-                      child: ExpansionTile(
-                          title: Text(
-                            journey.name,
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                          subtitle: Text(journey.createdOn,
-                              style: const TextStyle(fontSize: 15)),
-                          leading: const Icon(Icons.video_call,size: 40,),
-
-                          trailing: Icon(
-                            Icons.menu_open_outlined,
-                            color: journey.isVideoUploaded && journey.isCsvUploaded
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-
-                          children: <Widget>[
-                            const Divider(
-                              thickness: 1.0,
-                              height: 1.0,
-                            ),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 8.0,
-                                ),
-                                child: Text(
-                                      journey.description,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyText2
-                                      ?.copyWith(fontSize: 16),
-                                ),
+                            // All actions are defined in the children parameter.
+                            children: const [
+                              // A SlidableAction can have an icon and/or a label.
+                              SlidableAction(
+                                onPressed: null,
+                                backgroundColor: Color(0xFFFE4A49),
+                                foregroundColor: Colors.white,
+                                icon: Icons.delete,
+                                label: 'Delete',
                               ),
-                            ),
-                            ButtonBar(
-                              alignment: MainAxisAlignment.spaceAround,
-                              // buttonHeight: 52.0,
-                              // buttonMinWidth: 90.0,
-                              children: <Widget>[
-                                FlatButton(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(4.0)),
-                                  onPressed: () {
-                                    // cardA.currentState?.expand();
-                                    final route = MaterialPageRoute(
-                                      fullscreenDialog: true,
-                                      builder: (_) => VideoPage(filePath:journey.videoPath),
-                                    );
+                            ],
+                          ),
+                          // The end action pane is the one at the right or the bottom side.
 
-                                    Navigator.push(context, route);
-                                  },
-                                  child: Column(
-                                    children: const <Widget>[
-                                      Icon(Icons.video_collection),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 2.0),
-                                      ),
-                                      Text('Open'),
-                                    ],
+                          child: ExpansionTile(
+                              title: Text(
+                                journey.name,
+                                // style: const TextStyle(fontSize: 24),
+                              ),
+                              subtitle: Text(journey.createdOn,style: TextStyle(fontSize: 10),
                                   ),
-                                ),
-                                FlatButton(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(4.0)),
-                                    onPressed: ((!journey.isVideoUploaded && journey.isCsvUploaded) || (journey.isVideoUploaded && !journey.isCsvUploaded) || (!journey.isVideoUploaded && !journey.isCsvUploaded)) // if token is valid then only button is enabled.
-                                        ? () async => {
-                                      if( !await constants.checkInternetConnection()){
-                                        constants.snackbar(context, "Please check your Internet Connection and try again!", Colors.black),
-                                      },
-                                      if(tokenBox.get('token')?.token.length==0 && await constants.checkInternetConnection() ){
-                                      constants.snackbar(context," Please sign in.", null),
-                                      // Scaffold.of(context).showSnackBar(const SnackBar(
-                                      //     content: Text(" Please sign in."))),
-                                      },
+                              // leading: Container(
+                              //   child: IconButton(
+                              //     onPressed: () {
+                              //       // cardA.currentState?.expand();
+                              //       final route = MaterialPageRoute(
+                              //         fullscreenDialog: true,
+                              //         builder: (_) => VideoPage(filePath:journey.videoPath),
+                              //       );
+                              //
+                              //       Navigator.push(context, route);
+                              //     },
+                              //     icon:    Icon(Icons.video_collection),
+                              //   ),
+                              // ),
+
+                              trailing: Container(
+                                width: MediaQuery.of(context).size.width/3,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Container(
+                                      child: IconButton(
+                                        onPressed: () {
+                                          // cardA.currentState?.expand();
+                                          final route = MaterialPageRoute(
+                                            fullscreenDialog: true,
+                                            builder: (_) => VideoPage(filePath:journey.videoPath),
+                                          );
+
+                                          Navigator.push(context, route);
+                                        },
+                                        icon: Icon(Icons.play_circle,color:Colors.orangeAccent,),
+                                      ),
+                                    ),
+
+                                    Container(
+                                      child: IconButton(
+                                        // color: Colors.red,
+                                        onPressed: ((!journey.isVideoUploaded && journey.isCsvUploaded) || (journey.isVideoUploaded && !journey.isCsvUploaded) || (!journey.isVideoUploaded && !journey.isCsvUploaded)) // if token is valid then only button is enabled.
+                                            ? () async => {
+                                          if( !await constants.checkInternetConnection()){
+                                            constants.snackbar(context, "Please check your Internet Connection and try again!", Colors.black),
+                                          },
+                                          if(tokenBox.get('token')?.token.length==0 && await constants.checkInternetConnection() ){
+                                            constants.snackbar(context," Please sign in.", null),
+                                            // Scaffold.of(context).showSnackBar(const SnackBar(
+                                            //     content: Text(" Please sign in."))),
+                                          },
                                           // print('token ----------${tokenBox.get('token')?.token.toString()};;;;;;;;;;;;;;;;;;;;;;;;'),
                                           // print("${key}key;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                           // print("${journey.id} ----- id;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                           // upload = Upload(),
                                           // snackbar = showSnackbar(),
 
-                                      if(await constants.checkInternetConnection()){
-                                        if(journey.id.length == 0){
-                                          await upload.getprojectid(
-                                              token!, journey.name, journey,
-                                              key),
-                                        },
+                                          if(await constants.checkInternetConnection()){
+                                            if(journey.id.length == 0){
+                                              await upload.getprojectid(
+                                                  token!, journey.name, journey,
+                                                  key),
+                                            },
 
-                                        if(!journey.isCsvUploaded){
-                                          print("${journey.id}  ---- ${journey
-                                              .name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                          constants.snackbar(context,
-                                              "${journey.name} CSV UPLOADING",
-                                              null),
-                                          // Scaffold.of(context).showSnackBar(SnackBar(
-                                          //     content: Text("${journey.name} CSV UPLOADING"))),
-                                          await upload.uploadCsvToServer(
-                                              token!, journey.csvPath, journey,
-                                              key, journey.id).then((
-                                              statusCode) =>
-                                          {
-                                            // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                            constants.snackbar(context,
-                                                "${journey.name} CSV UPLOADED",
-                                                null),
-                                            // Scaffold.of(context).showSnackBar(SnackBar(
-                                            //     content: Text("${journey.name} CSV UPLOADED")))
-                                          }),
-                                        },
-                                        if(!journey.isVideoUploaded){
-                                          print("${journey.id}  ---- ${journey
-                                              .name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                          constants.snackbar(context,
-                                              "${journey.name} VIDEO UPLOADING",
-                                              null),
-                                          // Scaffold.of(context).showSnackBar(SnackBar(
-                                          // content: Text("${journey.name} VIDEO UPLOADING"))),
+                                            if(!journey.isCsvUploaded){
+                                              print("${journey.id}  ---- ${journey
+                                                  .name} ------  id of csv;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                              constants.snackbar(context,
+                                                  "${journey.name} CSV UPLOADING",
+                                                  null),
+                                              // Scaffold.of(context).showSnackBar(SnackBar(
+                                              //     content: Text("${journey.name} CSV UPLOADING"))),
+                                              await upload.uploadCsvToServer(
+                                                  token!, journey.csvPath, journey,
+                                                  key, journey.id).then((
+                                                  statusCode) =>
+                                              {
+                                                // print("$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                                constants.snackbar(context,
+                                                    "${journey.name} CSV UPLOADED",
+                                                    null),
+                                                // Scaffold.of(context).showSnackBar(SnackBar(
+                                                //     content: Text("${journey.name} CSV UPLOADED")))
+                                              }),
+                                            },
+                                            if(!journey.isVideoUploaded){
+                                              print("${journey.id}  ---- ${journey
+                                                  .name} ------  id of video;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
+                                              constants.snackbar(context,
+                                                  "${journey.name} VIDEO UPLOADING",
+                                                  null),
+                                              // Scaffold.of(context).showSnackBar(SnackBar(
+                                              // content: Text("${journey.name} VIDEO UPLOADING"))),
 
-                                          await upload.uploadVideoToServer(
-                                              token!, journey.videoPath,
-                                              journey, key, journey.id).then((
-                                              statusCode) =>
-                                          {
-                                            print(
-                                                "$statusCode----- statusCode;;;;;;;;;;;;;;"),
-                                            constants.snackbar(context,
-                                                "${journey
-                                                    .name} VIDEO UPLOADED",
-                                                null),
-                                            //  Scaffold.of(context).showSnackBar(SnackBar(
-                                            // content: Text("${journey.name} VIDEO UPLOADED")))
-                                          }),
+                                              await upload.uploadVideoToServer(
+                                                  token!, journey.videoPath,
+                                                  journey, key, journey.id).then((
+                                                  statusCode) =>
+                                              {
+                                                print(
+                                                    "$statusCode----- statusCode;;;;;;;;;;;;;;"),
+                                                constants.snackbar(context,
+                                                    "${journey
+                                                        .name} VIDEO UPLOADED",
+                                                    null),
+                                                //  Scaffold.of(context).showSnackBar(SnackBar(
+                                                // content: Text("${journey.name} VIDEO UPLOADED")))
+                                              }),
+                                            }
+                                          },
+                                          // print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
                                         }
-                                      },
-                                        // print("${journey.id}  ---- ${journey.name} ------  id of journey;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"),
-                                    }
-                                        : null,
+                                            : null,
 
-                                  child: Column(
-                                    children: const <Widget>[
-                                      Icon(Icons.cloud_upload_rounded),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 2.0),
+                                       icon: Icon(Icons.cloud_upload_rounded,color: journey.isVideoUploaded && journey.isCsvUploaded
+                                           ? Colors.grey
+                                           : Colors.blue,), // Text('Video & Csv'),
+
                                       ),
-                                      Text('Upload'),
-                                      Text('Video & Csv'),
-                                    ],
+                                    ),
+                                    Container(
+                                      child: Icon(
+                                        Icons.checklist,
+                                        color: journey.isVideoUploaded && journey.isCsvUploaded
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              children: <Widget>[
+                                // const Divider(
+                                //   thickness: 10.0,
+                                //   height: 1.0,
+                                // ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                      vertical: 8.0,
+                                    ),
+                                    child: Text(
+                                          journey.description,
+                                      // style: Theme.of(context)
+                                      //     .textTheme
+                                      //     .bodyText2
+                                      //     ?.copyWith(fontSize: null),
+                                    ),
                                   ),
                                 ),
+                                ButtonBar(
+                                  alignment: MainAxisAlignment.spaceAround,
+                                  // buttonHeight: 52.0,
+                                  // buttonMinWidth: 90.0,
+                                  children: <Widget>[
+
+
     //                             FlatButton(
     //                               shape: RoundedRectangleBorder(
     //                                   borderRadius:
@@ -466,9 +477,15 @@ class _MyHomePageState extends State<Database> {
     //                               ),
     //                             ),
 
-                              ],
-                            )
-                          ])),
+                                  ],
+                                )
+                              ])
+
+                      ),
+                    ),
+                    Container(height: 5,),
+
+                  ],
                 );
               },
               itemCount: keys.length,
