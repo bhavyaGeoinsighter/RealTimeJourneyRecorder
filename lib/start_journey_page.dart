@@ -84,7 +84,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
               padding:const EdgeInsets.only(
                   top: 30, bottom: 0),
               child: Container(
-                child: const Text('WELCOME',
+                child: const Text('RAIL INSIGHTER',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 30,
@@ -93,128 +93,124 @@ class _startJourneyScreen extends State<startJourneyScreen> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(children: [
-              TextField(
-                controller: name,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    labelText: 'Jourey Name',
-                    hintText: ''),
-              ),
-              Container(
-                height: 12,
-              ),
-              TextField(
-                controller: desciption,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    labelText: 'Journey Description',
-                    hintText: ''),
-              ),
-              Container(height: 15,),
-              
-              Container(
-                
-                child: Column(
+          Expanded(
+            child: Container(
+              // color: Colors.black,
+              width: MediaQuery.of(context).size.width,
+              child: Column(mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Colors.orange, borderRadius: BorderRadius.circular(20)),
-                      child: FlatButton(
-                        onPressed: () {
-                          String nametextToSend = name.text;
-                          String desctextToSend = desciption.text;
-                          print("$nametextToSend-----------------------------------$desctextToSend");
-                          if(nametextToSend.toString().length==0){
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-                                  elevation: 16,
-                                  child: Container(
-                                    child: ListView(
-                                      shrinkWrap: true,
-                                      children: <Widget>[
-                                        SizedBox(height: 20),
-                                        Center(child: Text('   Please enter your journey name')),
-                                        SizedBox(height: 20),
-                                        TextButton(
-                                          child: Text("OK"),
-                                          onPressed: () { Navigator.pop(context);},
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }else {
-                            Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                    builder: (context) =>
-                                        CameraPage(
-                                          name: nametextToSend,
-                                          description: desctextToSend,
-                                        )));
-                          }
-                        },
-                        
-
-                        child: const Text(
-                          'Start a Journey',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                    IconButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) =>
+                                const Database()));
+                      },
+                      icon: const Icon(Icons.video_library_outlined,size: 30,),
                     ),
 
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: const Color(0xff4c505b),
-                        child: IconButton(
-                          color: Colors.white,
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                    builder: (context) =>
-                                        const Database()));
-                          },
-                          icon: const Icon(Icons.video_library_outlined),
-                        ),
-                      ),
+                    IconButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        print(settingsBox.length.toString()+"---------------settingbox length");
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) =>
+                                const SettingsScreen()));
+                      },
+                      icon: const Icon(Icons.settings,size: 30,),
+                    ),
 
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: const Color(0xff4c505b),
-                        child: IconButton(
-                          color: Colors.white,
-                          onPressed: () {
-                            print(settingsBox.length.toString()+"---------------settingbox length");
-                            Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                    builder: (context) =>
-                                    const SettingsScreen()));
-                          },
-                          icon: const Icon(Icons.settings),
-                        ),
-                      ),
+                  ]),
+            ),
+          ),
+          
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20,right: 20),
+              child: SingleChildScrollView(
+                child: Column(children: [
+                  TextField(
+                    controller: name,
+                    decoration: const InputDecoration(
+                        // border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'Journey Name',
+                        hintText: ''),
+                  ),
+                  Container(
+                    height: 12,
+                  ),
+                  TextField(
+                    controller: desciption,
+                    decoration: const InputDecoration(
+                        // border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'Journey Description',
+                        hintText: ''),
+                  ),
+                  Container(height: 15,),
 
-                    ]),
-                  ],
-                ),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Colors.orange, borderRadius: BorderRadius.circular(20)),
+                    child: FlatButton(
+                      onPressed: () {
+                        String nametextToSend = name.text;
+                        String desctextToSend = desciption.text;
+                        print("$nametextToSend-----------------------------------$desctextToSend");
+                        if(nametextToSend.toString().length==0){
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                                elevation: 16,
+                                child: Container(
+                                  child: ListView(
+                                    shrinkWrap: true,
+                                    children: <Widget>[
+                                      SizedBox(height: 20),
+                                      Center(child: Text('   Please enter your journey name')),
+                                      SizedBox(height: 20),
+                                      TextButton(
+                                        child: Text("OK"),
+                                        onPressed: () { Navigator.pop(context);},
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }else {
+                          Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                  builder: (context) =>
+                                      CameraPage(
+                                        name: nametextToSend,
+                                        description: desctextToSend,
+                                      )));
+                        }
+                      },
+
+
+                      child: const Text(
+                        'Start a Journey',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ]),
               ),
-            ]),
+            ),
           ),
         ]),
       ),

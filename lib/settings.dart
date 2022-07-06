@@ -37,8 +37,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.orange,
         elevation: 0,
-        brightness: Brightness.light,
+        // brightness: Brightness.light,
         iconTheme: const IconThemeData(color: Colors.black),
         title: const Text('Settings',style: TextStyle(color: Colors.black),),
       ),
@@ -46,86 +47,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Card(
-              margin: EdgeInsets.all(8.0),
-              color: Colors.purple,
-              child: ListTile(
-                title: Text("John Doe"),
-                leading: CircleAvatar(
-                  // backgroundImage:,
-                ),
-                trailing: Icon(Icons.railway_alert_outlined),
-              ),
-            ),
-            const SizedBox(height: 10.0,),
+            // const SizedBox(height: 10.0,),
             Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
               child: Column(
                 children: <Widget>[
-                  // ListTile(
-                  //   leading: Icon(Icons.high_quality),
-                  //   title: Text("Resolution"),
-                  //   trailing:  Icon(Icons.keyboard_arrow_down),
-                  //   onTap: (){
-                  //
-                  //   },
-                  // ),
-                  Row(
-              children: <Widget>[
-                  Icon(Icons.high_quality),
-                // Text("         "),
-
-                const Text("         Resolution      ", style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400),),
-                // Text("      "),
-
-                DropdownButton<String>(
-                    focusColor:Colors.white,
-                    value: _chosenValue,
-                    //elevation: 5,
-                    style: TextStyle(color: Colors.white),
-                    iconEnabledColor:Colors.black,
-                    items: <String>[
-                      // '144p',
-                      '240p',
-                      '480p',
-                      '720p',
-                      '1080p',
-                      '2160p',
-                      '4k',
-                    ].map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value,style:TextStyle(color:Colors.black),),
-                      );
-                    }).toList(),
-                    hint:const Text(
-                      "Please choose a langauage",
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500),
+                  ListTile(
+                    leading: Icon(Icons.high_quality),
+                    title: Text("Resolution"),
+                    trailing:  DropdownButton<String>(
+                      focusColor:Colors.white,
+                      value: _chosenValue,
+                      //elevation: 5,
+                      style: TextStyle(color: Colors.white),
+                      iconEnabledColor:Colors.black,
+                      items: <String>[
+                        // '144p',
+                        '240p',
+                        '480p',
+                        '720p',
+                        '1080p',
+                        '2160p',
+                        '4k',
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value,style:TextStyle(color:Colors.black),),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          _chosenValue = value!;
+                          settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic);
+                          settingsBox.put('settings', sm);
+                          print(settingsBox.get('settings')!.resolution.toString()+"------------new resolution");
+                        });
+                      },
                     ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _chosenValue = value!;
-                        settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic);
-                        settingsBox.put('settings', sm);
-                        print(settingsBox.get('settings')!.resolution.toString()+"------------new resolution");
-                      });
+                    onTap: (){
+
                     },
-                  ),]
                   ),
+
                   IgnorePointer(
                     ignoring: isSkipped,
                     child: SwitchListTile(
-                      tileColor: isSkipped ? Colors.grey : Colors.white,
-                      activeColor: Colors.purple,
-                      secondary: const Icon(Icons.lightbulb_outline),
-                      contentPadding: const EdgeInsets.all(0),
-                      title:isSkipped ? Text("Automatic upload (Please sign in to use)"): Text("Automatic upload"),
+                      tileColor: isSkipped ? Colors.grey[200] : Colors.white,
+                      activeColor: Colors.orange,
+                      secondary: const Icon(Icons.upload),
+                      // contentPadding: const EdgeInsets.only(),
+                      title:isSkipped ? Container(
+                        // color: Colors.red,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Automatic upload"),
+                            Text("(Please sign in to use)",style:TextStyle(fontSize: 10)),
+                          ],
+                        ),
+                      ): Text("Automatic upload"),
                       value: autoupload,
                       onChanged: (bool value) {
                         setState(() {
