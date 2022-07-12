@@ -970,14 +970,21 @@ class OrderTrackingPageState extends State<OrderTrackingPage> {
           )
         },
         markers: {
-          const Marker(
+           Marker(
           markerId: MarkerId("source"),
           position: sourceLocation,
-
+            infoWindow: InfoWindow(
+              title: 'Start Point',
+              snippet: '---',
+            ),
         ),
-          const Marker(
+           Marker(
             markerId: MarkerId("destination"),
             position: destination,
+            infoWindow: InfoWindow(
+              title: 'End Point',
+              snippet: '---'
+            ),
           ),
         }
 
