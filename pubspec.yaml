@@ -47,6 +47,9 @@ dependencies:
   expansion_tile_card:
   chewie: 1.3.4
   flick_video_player:
+  flutter_polyline_points: ^1.0.0
+  google_maps_flutter: ^2.1.8
+  flutter_svg: ^1.1.1+1
 #  shared_preferences:
 #  raw_gnss:
   #  hive_generator:

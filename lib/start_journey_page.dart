@@ -15,6 +15,7 @@ import 'package:untitled/view_files.dart';
 
 import 'constants.dart';
 import 'main.dart';
+import 'maps.dart';
 
 class startJourneyScreen extends StatefulWidget {
   const startJourneyScreen({Key? key}) : super(key: key);
@@ -123,6 +124,17 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                                 const SettingsScreen()));
                       },
                       icon: const Icon(Icons.settings,size: 30,),
+                    ),
+                    IconButton(
+                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) =>
+                                const OrderTrackingPage()));
+                      },
+                      icon: const Icon(Icons.map_sharp,size: 30,),
                     ),
 
                   ]

@@ -293,6 +293,33 @@ class _CameraPageState extends State<CameraPage> {
           alignment: Alignment.bottomCenter,
           children: [
             CameraPreview(_cameraController),
+
+            StreamBuilder<LocationData>(
+                stream: Location().onLocationChanged,
+                builder: (context, location) {
+                  return Container(
+                    height: 200,
+                    // color: Colors.red,
+                    child: Row(
+                      children: [
+                        Column(
+                          children:  [
+                            Text("Location Accuracy:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 10), ),
+                            (location.data!=null)?
+                            Text(location.data!.accuracy!.toStringAsFixed(2)+" m",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 15),):
+                            Container(
+                              child: Text("null"),
+                            ),
+
+                          ],
+                        ),
+                      ],
+                    ),
+
+
+                  );
+                }
+            ),
             Padding(
               padding: const EdgeInsets.all(25),
               child: FloatingActionButton(
