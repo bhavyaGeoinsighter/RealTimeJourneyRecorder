@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
@@ -26,6 +27,9 @@ class _VideoPageState extends State<VideoPage> {
   late FlickManager flickManager;
   late FlickCurrentPosition currentPosition;
   late FlickVideoManager videoManager;
+  final Completer<GoogleMapController> _controller = Completer();
+  List<LatLng> polylineCoordinates = [];
+  bool setUpDone = false;
   @override
   void initState() {
     super.initState();
@@ -34,8 +38,10 @@ class _VideoPageState extends State<VideoPage> {
       videoPlayerController:
       VideoPlayerController.file(File(widget.videoFilePath)),
     );
-    hash();
+    // hash();
     csvToList();
+    setUpDone =true;
+
   }
 void hash(){
     // multipleCoord["1"] =LatLng(28.6151421,77.0329023);
@@ -50,6 +56,8 @@ void hash(){
   @override
   void dispose() {
     flickManager.dispose();
+    flickManager.flickVideoManager!.videoPlayerController!.dispose();
+
     super.dispose();
   }
   csvToList() async {
@@ -73,6 +81,7 @@ void hash(){
       print((long + " --------------------long"));
       multipleCoord["0"] = LatLng(double.parse(lat), double.parse(long));
       int totalTime = 0;
+      polylineCoordinates.add(LatLng(double.parse(lat), double.parse(long)));
 
       for(int i =1;i<fields.length;i++){
         if(fields[i].length>=3){
@@ -86,6 +95,7 @@ void hash(){
           print(lat +" ----------------------lat");
           print((long + " --------------------long"));
           multipleCoord[difference.toString()] = LatLng(double.parse(lat), double.parse(long));
+          polylineCoordinates.add(LatLng(double.parse(lat), double.parse(long)));
           totalTime = difference;
         }
       }
@@ -102,6 +112,11 @@ void hash(){
 
       }
 
+      for(int i=0;i<totalTime;i++){
+        if(!multipleCoord.containsKey(i.toString())){
+          print("NULL POINT COORDINATE" + "------------------------------------------------- NULL POINT");
+        }
+      }
       print(multipleCoord);
 
 
@@ -134,22 +149,50 @@ void hash(){
     //Do Something with the value.
       print(value.position.inSeconds.toString()+"------------------------------------------------------------------------""");
     // return Text(value.position.toString());
-      return GoogleMap(
-          initialCameraPosition:  CameraPosition(
-          target: (multipleCoord[value.position.inSeconds.toString()]!=null) ? multipleCoord[value.position.inSeconds.toString()]!: LatLng(28.6149173,77.0329372),
-          zoom: 13.5,
+
+      if(!setUpDone) {
+      return Container(
+          color: Colors.white,
+          child: const Center(
+            child: CircularProgressIndicator(),
           ),
+        );
+      }
+        else {
+          return GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: (multipleCoord[value.position.inSeconds.toString()] != null)
+                ? multipleCoord[value.position.inSeconds.toString()]!
+                : LatLng(28.6149173, 77.0329372),
+            zoom: 13.5,
+          ),
+          polylines: {
+            Polyline(
+              polylineId: const PolylineId("route"),
+              points: polylineCoordinates,
+              color: Colors.blue,
+              width: 6,
+            )
+          },
           markers: {
 
-    Marker(
-    markerId: MarkerId("source"),
-    position: (multipleCoord[value.position.inSeconds.toString()]!=null) ? multipleCoord[value.position.inSeconds.toString()]!: LatLng(28.6149173,77.0329372) ,
-    infoWindow: InfoWindow(
-    title: 'Start Point',
-    snippet: '---',
-    ),
-    ),}
-      );
+            Marker(
+              markerId: MarkerId("source"),
+              position: (multipleCoord[value.position.inSeconds.toString()] !=
+                  null)
+                  ? multipleCoord[value.position.inSeconds.toString()]!
+                  : LatLng(28.6149173, 77.0329372),
+              infoWindow: const InfoWindow(
+                title: 'Start Point',
+                snippet: '---',
+              ),
+            ),},
+          onMapCreated: (mapController) {
+            _controller.complete(mapController);
+          },
+
+        );
+      }
     },
     ),
           ),
