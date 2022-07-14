@@ -304,7 +304,7 @@ class _CameraPageState extends State<CameraPage> {
                       children: [
                         Column(
                           children:  [
-                            Text("Location Accuracy:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 10), ),
+                            Text(" Location Accuracy:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 10), ),
                             (location.data!=null)?
                             Text(location.data!.accuracy!.toStringAsFixed(2)+" m",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 15),):
                             Container(
@@ -444,6 +444,7 @@ class _CameraPageState extends State<CameraPage> {
   _recordVideo() async {
     if (_isRecording) {
       setState(() => _isRecording = false);
+      gpsLocationStream?.cancel();   //cancelling gps stream of Location plugin once recording gets stop.
       final XFile? vidFile = await _cameraController.stopVideoRecording();
       //move to same folder from cache and delete
       File cacheVideoFile = File(vidFile!.path);
@@ -461,7 +462,6 @@ class _CameraPageState extends State<CameraPage> {
       await cacheVideoFile.delete();
       //
       // await gpsCurrPosStream?.cancel();  //cancelling gps stream of geolocator plugin once recording gets stop.
-      gpsLocationStream?.cancel();   //cancelling gps stream of Location plugin once recording gets stop.
       // mytimer?.cancel();
       // await getprojectid(journey.name,journey,key),
       // await uploadVideoToServer(newVideoFile); // upload video to server

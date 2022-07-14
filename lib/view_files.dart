@@ -303,7 +303,7 @@ class _MyHomePageState extends State<Database> {
                                           // cardA.currentState?.expand();
                                           final route = MaterialPageRoute(
                                             fullscreenDialog: true,
-                                            builder: (_) => VideoPage(filePath:journey.videoPath),
+                                            builder: (_) => VideoPage(videoFilePath:journey.videoPath,csvFilePath: journey.csvPath,),
                                           );
 
                                           Navigator.push(context, route);
