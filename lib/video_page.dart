@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:file_picker/file_picker.dart';
@@ -21,15 +22,20 @@ class VideoPage extends StatefulWidget {
   @override
   _VideoPageState createState() => _VideoPageState();
 }
-final Map<String, LatLng> multipleCoord = HashMap(); // Is a HashMap
 
 class _VideoPageState extends State<VideoPage> {
   late FlickManager flickManager;
-  late FlickCurrentPosition currentPosition;
+  // late FlickCurrentPosition currentPosition;
   late FlickVideoManager videoManager;
-  final Completer<GoogleMapController> _controller = Completer();
+  late final Completer<GoogleMapController> _controller = Completer();
   List<LatLng> polylineCoordinates = [];
   bool setUpDone = false;
+  final Map<String, LatLng> multipleCoord = HashMap(); // Is a HashMap
+  LatLng? currentLocation=LatLng(28.6149173, 77.0329372);
+
+double zoom = 13.5;
+
+  StreamSubscription? time;
   @override
   void initState() {
     super.initState();
@@ -39,11 +45,15 @@ class _VideoPageState extends State<VideoPage> {
       VideoPlayerController.file(File(widget.videoFilePath)),
     );
     // hash();
+    polylineCoordinates.clear();
+    multipleCoord.clear();
     csvToList();
     setUpDone =true;
 
   }
+
 void hash(){
+    // flickManager.flickVideoManager.videoPlayerController.value.position.inSeconds
     // multipleCoord["1"] =LatLng(28.6151421,77.0329023);
     // multipleCoord["2"] = LatLng(28.615215,77.03323);
     // multipleCoord["3"] = LatLng(28.6066133,77.0354967);
@@ -56,8 +66,6 @@ void hash(){
   @override
   void dispose() {
     flickManager.dispose();
-    flickManager.flickVideoManager!.videoPlayerController!.dispose();
-
     super.dispose();
   }
   csvToList() async {
@@ -72,6 +80,7 @@ void hash(){
       print("---------------------------------------------------------------------" );
       print(fields[0][0].toString().split(' '));
       print("---------------------------------------------------------------------" );
+
       String t1 = fields[0][1];
       DateTime dateTime1 = DateTime.parse(t1);
       List<String> latLong = fields[0][0].toString().split(' ');
@@ -101,8 +110,8 @@ void hash(){
       }
 
       print(totalTime.toString()+"----------------------totalime");
-      LatLng? data = LatLng(0.0, 0.0);
-      for(int i=0;i<totalTime;i++){
+      LatLng? data = multipleCoord["0"];
+      for(int i=0;i<totalTime+60;i++){
         if(multipleCoord.containsKey(i.toString())){
           data = multipleCoord[i.toString()];
         }
@@ -121,6 +130,13 @@ void hash(){
 
 
   }
+  void streamTime() async{
+    // time = flickManager.flickControlManager.
+
+  }
+
+
+
 
 
   @override
@@ -142,63 +158,146 @@ void hash(){
         //     Text(flickManager.flickVideoManager!.videoPlayerController!.value.duration.inSeconds.toString()+' secs')
         //   ),
         // ),
-          Expanded(
-            child: ValueListenableBuilder(
-            valueListenable: flickManager.flickVideoManager!.videoPlayerController!,
+        Expanded(
+          child: ValueListenableBuilder(
+        valueListenable: flickManager.flickVideoManager!.videoPlayerController!,
     builder: (context, VideoPlayerValue value, child) {
     //Do Something with the value.
-      print(value.position.inSeconds.toString()+"------------------------------------------------------------------------""");
-    // return Text(value.position.toString());
-
-      if(!setUpDone) {
-      return Container(
-          color: Colors.white,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+      currentLocation = multipleCoord[value.position.inSeconds.toString()];
+      if(currentLocation!=null){
+      animate(currentLocation!);
       }
-        else {
-          return GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: (multipleCoord[value.position.inSeconds.toString()] != null)
-                ? multipleCoord[value.position.inSeconds.toString()]!
+      return currentLocation==null? Center(child: Icon(Icons.assistant_navigation,size: 40,),):
+      GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: (currentLocation != null)
+              ? currentLocation!
+              : LatLng(28.6149173, 77.0329372),
+          zoom: zoom,
+        ),
+        onCameraMove: _cameraMove,
+        polylines: {
+          Polyline(
+            polylineId:  PolylineId("route"),
+            points: polylineCoordinates,
+            color: Colors.blue,
+            width: 6,
+          )
+        },
+        markers: {
+
+          Marker(
+            markerId: MarkerId("source"),
+            position: (currentLocation !=
+                null)
+                ? currentLocation!
                 : LatLng(28.6149173, 77.0329372),
-            zoom: 13.5,
+            infoWindow:  InfoWindow(
+              title: currentLocation!.latitude.toString()+ ","+ currentLocation!.longitude.toString(),
+              snippet: '',
+            ),
           ),
-          polylines: {
-            Polyline(
-              polylineId: const PolylineId("route"),
-              points: polylineCoordinates,
-              color: Colors.blue,
-              width: 6,
-            )
-          },
-          markers: {
+        },
+        onMapCreated: (mapController) {
+          _controller.complete(mapController);
+        },
 
-            Marker(
-              markerId: MarkerId("source"),
-              position: (multipleCoord[value.position.inSeconds.toString()] !=
-                  null)
-                  ? multipleCoord[value.position.inSeconds.toString()]!
-                  : LatLng(28.6149173, 77.0329372),
-              infoWindow: const InfoWindow(
-                title: 'Start Point',
-                snippet: '---',
-              ),
-            ),},
-          onMapCreated: (mapController) {
-            _controller.complete(mapController);
-          },
+      );
+                },
+            // child:
+            //     currentLocation==null? Center(child: Text("Loading"),):
+            // GoogleMap(
+            //   initialCameraPosition: CameraPosition(
+            //     target: (currentLocation != null)
+            //         ? currentLocation!
+            //         : LatLng(28.6149173, 77.0329372),
+            //     zoom: 13.5,
+            //   ),
+            //   polylines: {
+            //     Polyline(
+            //       polylineId:  PolylineId("route"),
+            //       points: polylineCoordinates,
+            //       color: Colors.blue,
+            //       width: 6,
+            //     )
+            //   },
+            //   markers: {
+            //
+            //     Marker(
+            //       markerId: MarkerId("source"),
+            //       position: (currentLocation !=
+            //           null)
+            //           ? currentLocation!
+            //           : LatLng(28.6149173, 77.0329372),
+            //       infoWindow:  const InfoWindow(
+            //         title: 'Start Point',
+            //         snippet: '---',
+            //       ),
+            //     ),
+            //   },
+            //   onMapCreated: (mapController) {
+            //     _controller.complete(mapController);
+            //   },
+            //
+            // ) ,
+            ),
+        ),
 
-        );
-      }
-    },
-    ),
-          ),
+          // Expanded(
+          //   child:   currentLocation==null? Center(child: Text("Loading"),):
+          //           GoogleMap(
+          //             initialCameraPosition: CameraPosition(
+          //               target: (currentLocation != null)
+          //                   ? currentLocation!
+          //                   : LatLng(28.6149173, 77.0329372),
+          //               zoom: 13.5,
+          //             ),
+          //             polylines: {
+          //               Polyline(
+          //                 polylineId:  PolylineId("route"),
+          //                 points: polylineCoordinates,
+          //                 color: Colors.blue,
+          //                 width: 6,
+          //               )
+          //             },
+          //             markers: {
+          //
+          //               Marker(
+          //                 markerId: MarkerId("source"),
+          //                 position: (currentLocation !=
+          //                     null)
+          //                     ? currentLocation!
+          //                     : LatLng(28.6149173, 77.0329372),
+          //                 infoWindow:  InfoWindow(
+          //                   title: currentLocation!.latitude.toString()+ ","+ currentLocation!.longitude.toString(),
+          //                   snippet: '',
+          //                 ),
+          //               ),
+          //             },
+          //             onMapCreated: (mapController) {
+          //               _controller.complete(mapController);
+          //             },
+          //
+          //           ),
+          // ),
       ],
     );
   }
+
+  Future<void> animate(LatLng ll) async {
+    GoogleMapController gmc = await _controller.future;
+    gmc.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: ll,zoom: zoom)));
+    gmc.showMarkerInfoWindow(MarkerId("source"));
+    // gmc.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: ll,zoom: zoom)));
+    // setState(() {});
+    
+  }
+
+  double _cameraMove(CameraPosition position){
+    zoom = position.zoom;
+    return zoom;
+  }
+
 }
 
 //
