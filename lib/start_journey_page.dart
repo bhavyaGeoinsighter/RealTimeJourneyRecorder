@@ -83,7 +83,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
           Expanded(
             child: Padding(
               padding:const EdgeInsets.only(
-                  top: 30, bottom: 0),
+                  top: 70, bottom: 0),
               child: Container(
                 child: const Text('RAIL INSIGHTER',
                     style: TextStyle(
@@ -155,6 +155,13 @@ class _startJourneyScreen extends State<startJourneyScreen> {
                       child: Text(location.data.toString()),
                     ),
 
+
+                    Text("Satellites:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600), ),
+                    (location.data!=null)?
+                    Text(location.data!.satelliteNumber!.toString(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),):
+                    Container(
+                      child: Text(location.data.toString()),
+                    ),
                   ],
                 ),
 

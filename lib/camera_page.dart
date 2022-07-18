@@ -194,11 +194,12 @@ class _CameraPageState extends State<CameraPage> {
       String longitude = currentLocation.longitude.toString();
       String currTime = dt.toUtc().toString();
       String accuracy = currentLocation.accuracy.toString();
+      String bearing = currentLocation.heading.toString();
       // String? timestamp = position.timestamp?.toUtc().toString();
-      // String altitude = position.altitude.toString();
-      // String speed = position.speed.toString();
+      String altitude = currentLocation.altitude.toString();
+      String speed = currentLocation.speed.toString();
       // String speedAcurracy = position.speedAccuracy.toString();
-      csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy\n',mode: FileMode.append);
+      csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing\n',mode: FileMode.append);
 
 
 

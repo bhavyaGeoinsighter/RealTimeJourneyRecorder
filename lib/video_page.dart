@@ -22,6 +22,16 @@ class VideoPage extends StatefulWidget {
   @override
   _VideoPageState createState() => _VideoPageState();
 }
+class marker_data{
+  late LatLng latLng;
+  late double accuracy;
+  late double bearing;
+  marker_data(LatLng latLng,double accuracy,double bearing){
+    this.latLng = latLng;
+    this.accuracy = accuracy;
+    this.bearing = bearing;
+  }
+}
 
 class _VideoPageState extends State<VideoPage> {
   late FlickManager flickManager;
@@ -31,9 +41,15 @@ class _VideoPageState extends State<VideoPage> {
   List<LatLng> polylineCoordinates = [];
   bool setUpDone = false;
   final Map<String, LatLng> multipleCoord = HashMap(); // Is a HashMap
-  LatLng? currentLocation=LatLng(28.6149173, 77.0329372);
 
-double zoom = 13.5;
+
+  LatLng? currentLocation = LatLng(28.6149173, 77.0329372);
+  double accuracy = 0.0;
+  double bearing = 0.0;
+  final Map<String, marker_data> marker_data_objects = HashMap(); // Is a HashMap
+
+
+  double zoom = 13.5;
 
   StreamSubscription? time;
   @override
@@ -52,17 +68,6 @@ double zoom = 13.5;
 
   }
 
-void hash(){
-    // flickManager.flickVideoManager.videoPlayerController.value.position.inSeconds
-    // multipleCoord["1"] =LatLng(28.6151421,77.0329023);
-    // multipleCoord["2"] = LatLng(28.615215,77.03323);
-    // multipleCoord["3"] = LatLng(28.6066133,77.0354967);
-    // multipleCoord["4"] = LatLng(28.6050899,77.0345912);
-    // multipleCoord["5"] =   LatLng(28.6037102,77.0334788);
-    // multipleCoord["6"] =     LatLng(28.5999185,77.0298561);
-
-
-}
   @override
   void dispose() {
     flickManager.dispose();
@@ -78,7 +83,7 @@ void hash(){
           .transform(new CsvToListConverter(eol: '\n'))
           .toList();
       print("---------------------------------------------------------------------" );
-      print(fields[0][0].toString().split(' '));
+      print(fields[0][1].toString().split(' '));
       print("---------------------------------------------------------------------" );
 
       String t1 = fields[0][1];
@@ -86,9 +91,24 @@ void hash(){
       List<String> latLong = fields[0][0].toString().split(' ');
       String lat = latLong[0].substring(4);
       String long = latLong[1].substring(0,latLong[1].length-1);
-      print(lat +" ----------------------lat");
-      print((long + " --------------------long"));
+      // print(lat +" ----------------------lat");
+      // print((long + " --------------------long"));
       multipleCoord["0"] = LatLng(double.parse(lat), double.parse(long));
+
+      ///////////////////////////////////////
+      try {
+        marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[0][2],fields[0][5]);
+        marker_data_objects["0"] = mdata;
+
+      } catch (e) {
+        marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[0][2],0.0);
+        marker_data_objects["0"] = mdata;
+        // print(s);
+      }
+      // marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[0][2],0.0);
+      // marker_data_objects["0"] = mdata;
+      ///////////////////////////////////////
+
       int totalTime = 0;
       polylineCoordinates.add(LatLng(double.parse(lat), double.parse(long)));
 
@@ -103,13 +123,26 @@ void hash(){
           String long = latLong[1].substring(0,latLong[1].length-1);
           print(lat +" ----------------------lat");
           print((long + " --------------------long"));
+          /////////////////////////////////////////////
+          try {
+            marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[i][2],fields[i][5]);
+            marker_data_objects[difference.toString()] = mdata;
+
+          } catch (e, s) {
+            marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[i][2],i*4%360);
+            marker_data_objects[difference.toString()] = mdata;
+            print(s);
+          }
+          // marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[0][2],i*4%360);
+          // marker_data_objects[difference.toString()] = mdata;
+          /////////////////////////////////////////////
           multipleCoord[difference.toString()] = LatLng(double.parse(lat), double.parse(long));
           polylineCoordinates.add(LatLng(double.parse(lat), double.parse(long)));
           totalTime = difference;
         }
       }
 
-      print(totalTime.toString()+"----------------------totalime");
+      print(fields[0][5].toString()+"----------------------totalime");
       LatLng? data = multipleCoord["0"];
       for(int i=0;i<totalTime+60;i++){
         if(multipleCoord.containsKey(i.toString())){
@@ -117,6 +150,20 @@ void hash(){
         }
         else{
           multipleCoord[i.toString()] = data!;
+        }
+
+      }
+
+
+      ////////////////////////////////////////////
+      marker_data? marker_data_secs = marker_data_objects["0"];
+
+      for(int i=0;i<totalTime+60;i++){
+        if(marker_data_objects.containsKey(i.toString())){
+          marker_data_secs = marker_data_objects[i.toString()];
+        }
+        else{
+          marker_data_objects[i.toString()] = marker_data_secs!;
         }
 
       }
@@ -163,10 +210,12 @@ void hash(){
         valueListenable: flickManager.flickVideoManager!.videoPlayerController!,
     builder: (context, VideoPlayerValue value, child) {
     //Do Something with the value.
-      currentLocation = multipleCoord[value.position.inSeconds.toString()];
+      currentLocation = marker_data_objects[value.position.inSeconds.toString()]?.latLng;
+      bearing =( marker_data_objects[value.position.inSeconds.toString()]==null)?bearing:marker_data_objects[value.position.inSeconds.toString()]!.bearing ;
       if(currentLocation!=null){
-      animate(currentLocation!);
+        animate(currentLocation!,bearing);
       }
+
       return currentLocation==null? Center(child: Icon(Icons.assistant_navigation,size: 40,),):
       GoogleMap(
         initialCameraPosition: CameraPosition(
@@ -184,6 +233,7 @@ void hash(){
             width: 6,
           )
         },
+        mapType: MapType.satellite,
         markers: {
 
           Marker(
@@ -194,7 +244,7 @@ void hash(){
                 : LatLng(28.6149173, 77.0329372),
             infoWindow:  InfoWindow(
               title: currentLocation!.latitude.toString()+ ","+ currentLocation!.longitude.toString(),
-              snippet: '',
+              snippet: 'Bearing: '+marker_data_objects[value.position.inSeconds.toString()]!.bearing.toString(),
             ),
           ),
         },
@@ -204,42 +254,6 @@ void hash(){
 
       );
                 },
-            // child:
-            //     currentLocation==null? Center(child: Text("Loading"),):
-            // GoogleMap(
-            //   initialCameraPosition: CameraPosition(
-            //     target: (currentLocation != null)
-            //         ? currentLocation!
-            //         : LatLng(28.6149173, 77.0329372),
-            //     zoom: 13.5,
-            //   ),
-            //   polylines: {
-            //     Polyline(
-            //       polylineId:  PolylineId("route"),
-            //       points: polylineCoordinates,
-            //       color: Colors.blue,
-            //       width: 6,
-            //     )
-            //   },
-            //   markers: {
-            //
-            //     Marker(
-            //       markerId: MarkerId("source"),
-            //       position: (currentLocation !=
-            //           null)
-            //           ? currentLocation!
-            //           : LatLng(28.6149173, 77.0329372),
-            //       infoWindow:  const InfoWindow(
-            //         title: 'Start Point',
-            //         snippet: '---',
-            //       ),
-            //     ),
-            //   },
-            //   onMapCreated: (mapController) {
-            //     _controller.complete(mapController);
-            //   },
-            //
-            // ) ,
             ),
         ),
 
@@ -284,10 +298,11 @@ void hash(){
     );
   }
 
-  Future<void> animate(LatLng ll) async {
+  Future<void> animate(LatLng ll, double bearing) async {
     GoogleMapController gmc = await _controller.future;
-    gmc.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: ll,zoom: zoom)));
     gmc.showMarkerInfoWindow(MarkerId("source"));
+
+    gmc.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: ll,zoom: zoom, bearing : bearing)));
     // gmc.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: ll,zoom: zoom)));
     // setState(() {});
     
