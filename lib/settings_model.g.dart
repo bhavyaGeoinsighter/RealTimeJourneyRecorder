@@ -19,17 +19,23 @@ class settingsModelAdapter extends TypeAdapter<settingsModel> {
     return settingsModel(
       resolution: fields[0] as String,
       automatic: fields[1] as bool,
+      showMap: fields[2] as bool,
+      mapType: fields[3] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, settingsModel obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.resolution)
       ..writeByte(1)
-      ..write(obj.automatic);
+      ..write(obj.automatic)
+      ..writeByte(2)
+      ..write(obj.showMap)
+      ..writeByte(3)
+      ..write(obj.mapType);
   }
 
   @override

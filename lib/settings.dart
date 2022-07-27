@@ -18,7 +18,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final Upload upload = Upload();
   late Box<tokenModel> tokenBox;
   late bool autoupload;
+  late bool showMap;
   late String _chosenValue;
+  late String mapType;
+
   late bool isSkipped = tokenBox.get('token')?.token.toString().length==0;
 
 
@@ -29,6 +32,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     tokenBox = Hive.box<tokenModel>(tokenBoxName);
     autoupload = settingsBox.get('settings')!.automatic;
   _chosenValue = settingsBox.get('settings')!.resolution;
+    showMap = settingsBox.get('settings')!.showMap;
+    mapType = settingsBox.get('settings')!.mapType;
+
+    print(settingsBox.get('settings')!.showMap.toString()+"   ----$showMap------------new shomap");
+
     isSkipped = tokenBox.get('token')?.token.toString().length==0;
   }
 
@@ -78,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (String? value) {
                         setState(() {
                           _chosenValue = value!;
-                          settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic);
+                          settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType );
                           settingsBox.put('settings', sm);
                           print(settingsBox.get('settings')!.resolution.toString()+"------------new resolution");
                         });
@@ -113,14 +121,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           autoupload = value;
                           print("value --------------------- $value");
                           if(value){
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true,showMap:settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType );
                             settingsBox.put('settings', sm);
                             print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
                             upload.autoUpload();
 
                           }
                           else{
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType);
                             settingsBox.put('settings', sm);
                             print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
 
@@ -131,14 +139,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     ),
                   ),
-                  // ListTile(
-                  //   leading: Icon(Icons.high_quality),
-                  //   title: Text("Resolution"),
-                  //   trailing:  Icon(Icons.keyboard_arrow_down),
-                  //   onTap: (){
-                  //
+                  // CheckboxListTile(
+                  //   title: Text("title text"),
+                  //   value: showMap,
+                  //   onChanged: (value) {
+                  //     setState(() {
+                  //       showMap = value!;
+                  //     });
                   //   },
+                  //   controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
                   // ),
+                  ListTile(
+                    leading: Icon(Icons.map),
+                    title: Text("Show Map"),
+                    trailing:  Checkbox(
+                      checkColor: Colors.white,
+                      // fillColor: MaterialStateProperty.resolveWith(Colors.blue),
+                      value: showMap,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          showMap = value!;
+                          if(value){
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: true,mapType:settingsBox.get('settings')!.mapType);
+                            settingsBox.put('settings', sm);
+                          }
+                          else{
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: false,mapType:settingsBox.get('settings')!.mapType);
+                            settingsBox.put('settings', sm);
+                          }
+                          print("value --------------------- $value");
+                        });
+                      },
+                    ),
+                    onTap: (){
+
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.high_quality),
+                    title: Text("Map Type"),
+                    trailing:  DropdownButton<String>(
+                      focusColor:Colors.white,
+                      value: mapType,
+                      //elevation: 5,
+                      style: TextStyle(color: Colors.white),
+                      iconEnabledColor:Colors.black,
+                      items: <String>[
+                        // '144p',
+                        'satellite',
+                        'normal',
+                        'terrain',
+                        'hybrid',
+                        'none'
+
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value,style:TextStyle(color:Colors.black),),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          mapType = value!;
+                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType: mapType.toString());
+                          settingsBox.put('settings', sm);
+                          print(settingsBox.get('settings')!.mapType.toString()+"------------new type");
+                        });
+                      },
+                    ),
+                    onTap: (){
+
+                    },
+                  ),
                 ],
               ),
 

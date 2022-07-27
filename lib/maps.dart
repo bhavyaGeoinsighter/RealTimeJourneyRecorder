@@ -961,6 +961,7 @@ class OrderTrackingPageState extends State<OrderTrackingPage> {
           target: sourceLocation,
           zoom: 13.5,
         ),
+        mapType: MapType.none,
         polylines: {
           Polyline(
             polylineId: const PolylineId("route"),

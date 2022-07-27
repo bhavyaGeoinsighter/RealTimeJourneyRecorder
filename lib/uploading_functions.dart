@@ -15,7 +15,7 @@ import 'main.dart';
 
 class Upload {
   String? projectid;
-  String? serverIpAddress='http://15.206.73.160:8081/api';
+  String? serverIpAddress='http://15.206.73.160/api';
   late Box<journeyModel> journeyBox;
   late Box<tokenModel> tokenBox;
   final int responseCode = 200;

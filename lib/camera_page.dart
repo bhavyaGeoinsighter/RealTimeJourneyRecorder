@@ -56,7 +56,7 @@ class _CameraPageState extends State<CameraPage> {
   bool _isLoading = true;
   late CameraController _cameraController;
   bool _isCameraInitialized = false;
-
+  // final stopwatch = Stopwatch();
   String? data;//not used
   Timer? mytimer; //not used
   // StreamSubscription? gpsCurrPosStream;// Geolocator plugin
@@ -89,6 +89,48 @@ class _CameraPageState extends State<CameraPage> {
 
   late final Upload upload = Upload();
   late final constantFunctions constants = constantFunctions();
+  // String timeString = "00:00:00";
+  final ValueNotifier<String> timeString = ValueNotifier<String>("00:00:00");
+// add from this line
+  Stopwatch stopwatch = Stopwatch();
+  late Timer timer;
+
+  void start(){
+    stopwatch.start();
+    timer = Timer.periodic(Duration(milliseconds: 1), update);
+  }
+
+  void update(Timer t){
+    if(stopwatch.isRunning){
+      // setState(() {
+        timeString.value =
+            (stopwatch.elapsed.inHours % 60).toString().padLeft(2, "0") + ":"+
+            (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, "0") + ":" +
+                (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, "0") ;
+                // (stopwatch.elapsed.inMilliseconds % 1000 / 10).clamp(0, 99).toStringAsFixed(0).padLeft(2, "0");
+      // });
+
+    }
+  }
+
+  void stop(){
+    setState(() {
+      timer.cancel();
+      stopwatch.stop();
+    });
+
+  }
+
+  void reset(){
+    timer.cancel();
+    stopwatch.reset();
+    // setState((){
+      timeString.value = "00:00:00";
+
+    // });
+    stopwatch.stop();
+  }
+
 
 
   @override
@@ -321,12 +363,52 @@ class _CameraPageState extends State<CameraPage> {
                   );
                 }
             ),
+            // Column(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: <Widget>[
+            //     Icon(Icons.timer, size: 20, color: Colors.white),
+            //     Text(timeString.value,
+            //         style: TextStyle(
+            //             fontSize: 30,
+            //             color: Colors.white
+            //         )
+            //     )
+            //   ],
+            // ),
+
+            // Text(stopwatch.elapsed.inSeconds.toString()),
+
+            ValueListenableBuilder<String>(
+              builder: (BuildContext context, String value, Widget? child) {
+                // This builder will only get called when the _counter
+                // is updated.
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.timer, size: 20, color: Colors.white),
+                    Text(timeString.value,
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.white
+                        )
+                    )
+                  ],
+                );
+              },
+              valueListenable: timeString,
+              // The child parameter is most helpful if the child is
+              // expensive to build and does not depend on the value from
+              // the notifier.
+              // child: goodJob,
+            ),
+
             Padding(
               padding: const EdgeInsets.all(25),
               child: FloatingActionButton(
                 backgroundColor:_isRecording? Colors.white:Colors.red,
                 child: Icon(_isRecording ? Icons.stop : Icons.play_arrow,size: 36,color: _isRecording? Colors.red:Colors.white,),
-                onPressed: () => _recordVideo(),
+                onPressed: () { _recordVideo();      stopwatch.isRunning ? stop() : start();
+                },
               ),
             ),
             Padding(padding: const EdgeInsets.all(100),
@@ -358,6 +440,18 @@ class _CameraPageState extends State<CameraPage> {
     }
 }
 
+
+_pause() async{
+    _cameraController.pauseVideoRecording();
+    gpsLocationStream?.pause();
+    _pause();
+}
+
+_resume() async{
+    _cameraController.resumeVideoRecording();
+    gpsLocationStream?.resume();
+    _resume();
+}
 
   //Not Used
   void onNewCameraSelected(CameraDescription cameraDescription) async {
@@ -444,6 +538,8 @@ class _CameraPageState extends State<CameraPage> {
   bool _isRecording = false;
   _recordVideo() async {
     if (_isRecording) {
+      // stopwatch.stop();
+      // stopwatch.isRunning ? stop() : start();
       setState(() => _isRecording = false);
       gpsLocationStream?.cancel();   //cancelling gps stream of Location plugin once recording gets stop.
       final XFile? vidFile = await _cameraController.stopVideoRecording();
@@ -507,6 +603,9 @@ class _CameraPageState extends State<CameraPage> {
       print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'+name.toString()+ ';;;;;;;;;;;'+ description.toString() );
       await _cameraController.prepareForVideoRecording();
       await _cameraController.startVideoRecording();
+      // stopwatch.start();
+      // stopwatch.isRunning ? stop() : start();
+      print(stopwatch.elapsed.inSeconds.toString() + "------------------stopwatch");
       setState(() => _isRecording = true);
       setState(() {
         if(name==null || name?.length==0){

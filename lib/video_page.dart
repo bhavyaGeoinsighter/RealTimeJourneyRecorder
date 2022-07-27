@@ -4,18 +4,21 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hive/hive.dart';
 import 'package:location/location.dart';
+import 'package:untitled/settings_model.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flick_video_player/flick_video_player.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:csv/csv.dart';
 import 'dart:convert' show utf8;
 
+import 'main.dart';
+
 
 class VideoPage extends StatefulWidget {
   final String videoFilePath;
   final String csvFilePath;
-
 
   const VideoPage({Key? key, required this.videoFilePath,required this.csvFilePath}) : super(key: key);
 
@@ -41,6 +44,7 @@ class _VideoPageState extends State<VideoPage> {
   List<LatLng> polylineCoordinates = [];
   bool setUpDone = false;
   final Map<String, LatLng> multipleCoord = HashMap(); // Is a HashMap
+  late Box<settingsModel> settingsBox;
 
 
   LatLng? currentLocation = LatLng(28.6149173, 77.0329372);
@@ -61,10 +65,12 @@ class _VideoPageState extends State<VideoPage> {
       VideoPlayerController.file(File(widget.videoFilePath)),
     );
     // hash();
+    settingsBox = Hive.box<settingsModel>(settingsBoxName);
     polylineCoordinates.clear();
     multipleCoord.clear();
     csvToList();
     setUpDone =true;
+
 
   }
 
@@ -184,6 +190,25 @@ class _VideoPageState extends State<VideoPage> {
 
 
 
+  MapType mapType(){
+    if(settingsBox.get('settings')!.mapType.toString() == "normal"){
+      return MapType.normal;
+    }
+    else if(settingsBox.get('settings')!.mapType.toString() == "satellite"){
+      return MapType.satellite;
+    }
+    else if(settingsBox.get('settings')!.mapType.toString() == "hybrid"){
+      return MapType.hybrid;
+    }
+    else if(settingsBox.get('settings')!.mapType.toString() == "terrain"){
+      return MapType.terrain;
+    }
+    else {
+      return MapType.none;
+    }
+
+  }
+
 
 
   @override
@@ -205,7 +230,9 @@ class _VideoPageState extends State<VideoPage> {
         //     Text(flickManager.flickVideoManager!.videoPlayerController!.value.duration.inSeconds.toString()+' secs')
         //   ),
         // ),
-        Expanded(
+
+        //Checking from settings to show the map or not.
+        (settingsBox.get('settings')!.showMap)?Expanded(
           child: ValueListenableBuilder(
         valueListenable: flickManager.flickVideoManager!.videoPlayerController!,
     builder: (context, VideoPlayerValue value, child) {
@@ -233,7 +260,7 @@ class _VideoPageState extends State<VideoPage> {
             width: 6,
           )
         },
-        mapType: MapType.satellite,
+        mapType: mapType(),
         markers: {
 
           Marker(
@@ -243,8 +270,8 @@ class _VideoPageState extends State<VideoPage> {
                 ? currentLocation!
                 : LatLng(28.6149173, 77.0329372),
             infoWindow:  InfoWindow(
-              title: currentLocation!.latitude.toString()+ ","+ currentLocation!.longitude.toString(),
-              snippet: 'Bearing: '+marker_data_objects[value.position.inSeconds.toString()]!.bearing.toString(),
+              title:'latitude: '+ currentLocation!.latitude.toString()+ ", "+ 'longitude: '+currentLocation!.longitude.toString(),
+              snippet: 'Accuracy: '+marker_data_objects[value.position.inSeconds.toString()]!.accuracy.toStringAsFixed(2),
             ),
           ),
         },
@@ -255,7 +282,7 @@ class _VideoPageState extends State<VideoPage> {
       );
                 },
             ),
-        ),
+        ): Container(),
 
           // Expanded(
           //   child:   currentLocation==null? Center(child: Text("Loading"),):

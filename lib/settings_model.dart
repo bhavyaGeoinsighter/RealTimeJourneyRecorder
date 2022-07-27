@@ -9,7 +9,11 @@ class settingsModel {
   late String resolution = '720p';
   @HiveField(1)
   late bool automatic = false;
+  @HiveField(2)
+  late bool showMap = false;
+  @HiveField(3)
+  late String mapType = 'normal';
 
-  settingsModel({required this.resolution,required this.automatic});
+  settingsModel({required this.resolution,required this.automatic,required this.showMap,required this.mapType});
 
 }

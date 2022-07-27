@@ -51,7 +51,7 @@ class _startJourneyScreen extends State<startJourneyScreen> {
 
     //autoUpload if Internet is connected and automatic upload is true from settings.
     if(settingsBox.length==0){
-      settingsModel sm = settingsModel(resolution: "720p", automatic: true);
+      settingsModel sm = settingsModel(resolution: "720p", automatic: false,showMap: true,mapType: 'normal');
       settingsBox.put('settings', sm);
     }
     if(settingsBox.length!=0 && settingsBox.get('settings')!.automatic) {
