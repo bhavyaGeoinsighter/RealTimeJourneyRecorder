@@ -13,7 +13,10 @@ class settingsModel {
   late bool showMap = false;
   @HiveField(3)
   late String mapType = 'normal';
+  @HiveField(4)
+  late bool autoPlayPause = false;
 
-  settingsModel({required this.resolution,required this.automatic,required this.showMap,required this.mapType});
+
+  settingsModel({required this.resolution,required this.automatic,required this.showMap,required this.mapType,required this.autoPlayPause});
 
 }

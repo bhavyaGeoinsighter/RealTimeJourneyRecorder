@@ -95,6 +95,8 @@ class _CameraPageState extends State<CameraPage> {
   Stopwatch stopwatch = Stopwatch();
   late Timer timer;
 
+  bool _isVideoPaused = false;
+
   void start(){
     stopwatch.start();
     timer = Timer.periodic(Duration(milliseconds: 1), update);
@@ -104,9 +106,7 @@ class _CameraPageState extends State<CameraPage> {
     if(stopwatch.isRunning){
       // setState(() {
         timeString.value =
-            (stopwatch.elapsed.inHours % 60).toString().padLeft(2, "0") + ":"+
-            (stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, "0") + ":" +
-                (stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, "0") ;
+            "${(stopwatch.elapsed.inHours % 60).toString().padLeft(2, "0")}:${(stopwatch.elapsed.inMinutes % 60).toString().padLeft(2, "0")}:${(stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, "0")}" ;
                 // (stopwatch.elapsed.inMilliseconds % 1000 / 10).clamp(0, 99).toStringAsFixed(0).padLeft(2, "0");
       // });
 
@@ -249,6 +249,66 @@ class _CameraPageState extends State<CameraPage> {
     });
   }
 
+  _gpsLocationAutomaticPlayPauseVideoStream() async{
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    LocationData _locationData;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+    final csvFile =  await _localFile;
+
+    // LocationData locationData;
+    // _locationData = await location.getLocation();
+    await location.changeSettings(interval: 1000);
+    gpsLocationStream = location.onLocationChanged.listen((LocationData currentLocation) {
+      var dt = DateTime.now();
+      String latitude = currentLocation.latitude.toString();
+      String longitude = currentLocation.longitude.toString();
+      String currTime = dt.toUtc().toString();
+      String accuracy = currentLocation.accuracy.toString();
+      String bearing = currentLocation.heading.toString();
+      // String? timestamp = position.timestamp?.toUtc().toString();
+      String altitude = currentLocation.altitude.toString();
+      String speed = currentLocation.speed.toString();
+      // String speedAcurracy = position.speedAccuracy.toString();
+      if(currentLocation.speed! >=0.15) {
+        csvFile.writeAsString(
+            'GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing\n',
+            mode: FileMode.append);
+        _cameraController.resumeVideoRecording();
+        stopwatch.start();
+      }
+      else{
+        // _isVideoPaused = true;
+        _cameraController.pauseVideoRecording();
+        stopwatch.stop();
+      }
+
+
+
+
+    });
+
+
+  }
+
+
+
+
 //GeoLocator Plugin
 // // Getting permission for gps, checking for GPS, Getting latitude & longitude
 //   _determinePosition() async {
@@ -353,6 +413,19 @@ class _CameraPageState extends State<CameraPage> {
                             Container(
                               child: Text("null"),
                             ),
+                            Text(" Location Speed:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 10), ),
+                            (location.data!=null)?
+                            Text(location.data!.speed!.toStringAsFixed(2)+" m/s",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 15),):
+                            Container(
+                              child: Text("null"),
+                            ),
+                            Text(" Location speedAccuracy:",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 10), ),
+                            (location.data!=null)?
+                            Text(location.data!.speedAccuracy!.toString()+" m",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 15),):
+                            Container(
+                              child: Text("null"),
+                            ),
+
 
                           ],
                         ),
@@ -407,16 +480,36 @@ class _CameraPageState extends State<CameraPage> {
               child: FloatingActionButton(
                 backgroundColor:_isRecording? Colors.white:Colors.red,
                 child: Icon(_isRecording ? Icons.stop : Icons.play_arrow,size: 36,color: _isRecording? Colors.red:Colors.white,),
-                onPressed: () { _recordVideo();      stopwatch.isRunning ? stop() : start();
+                onPressed: () { _recordVideo(); stopwatch.isRunning ? stop() : start();
                 },
               ),
             ),
-            Padding(padding: const EdgeInsets.all(100),
-            child : FloatingActionButton(
-              backgroundColor: Colors.red,child: Icon( isFlashModeOn ? Icons.flash_off : Icons.flash_on ), onPressed: () {
-                _Flash();
-                },
-            ),
+
+
+            Container(
+              // color: Colors.red,
+              height: 100,
+              width: MediaQuery.of(context).size.width+60,
+              child: Row(
+                children: [
+                  Container(width: MediaQuery.of(context).size.width/2-100,),
+
+                  FloatingActionButton(
+                    backgroundColor: Colors.red,child: Icon( isFlashModeOn ? Icons.flash_off : Icons.flash_on ), onPressed: () {
+                    _Flash();
+                  },
+                  ),
+                  Container(width: MediaQuery.of(context).size.width/3-30,),
+                  (_isRecording)?
+                  FloatingActionButton(
+                    backgroundColor: Colors.red,child: Icon( _isVideoPaused ? Icons.pause : Icons.play_circle_outline_outlined ), onPressed: () {
+                      _videoPause();
+                      _isVideoPaused? stopwatch.stop(): stopwatch.start();
+
+                  },
+                  ):Container(),
+                ],
+              ),
             ),
 
 
@@ -426,6 +519,17 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
+  _videoPause(){
+    if(_isVideoPaused){
+      setState(() =>_isVideoPaused = false);
+      _cameraController.resumeVideoRecording();
+
+    }
+    else{
+      setState(() => _isVideoPaused = true);
+      _cameraController.pauseVideoRecording();
+    }
+  }
 
   _Flash()  async{
     if(isFlashModeOn){
@@ -625,7 +729,7 @@ _resume() async{
       }); //assigning unique file name on every start recording key is pressed.
       // await _determinePosition(); //start gps current location stream and writing file after we get the position(lat,long) // Geolocator plugin
       // mytimer = await Timer.periodic(Duration(seconds: 1), (Timer t) => _gpsforged());
-      await _gpsLocation(); //Location plugin used
+      (!settingsBox.get('settings')!.autoPlayPause)?await _gpsLocation():await _gpsLocationAutomaticPlayPauseVideoStream(); //Location plugin used
       // await gettoken();
       // await getprojectid();
 
