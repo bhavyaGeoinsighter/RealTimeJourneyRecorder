@@ -15,8 +15,10 @@ class settingsModel {
   late String mapType = 'normal';
   @HiveField(4)
   late bool autoPlayPause = false;
+  @HiveField(5)
+  late String speedThreshold = '0.1 m/s';
 
 
-  settingsModel({required this.resolution,required this.automatic,required this.showMap,required this.mapType,required this.autoPlayPause});
+  settingsModel({required this.resolution,required this.automatic,required this.showMap,required this.mapType,required this.autoPlayPause,required this.speedThreshold});
 
 }

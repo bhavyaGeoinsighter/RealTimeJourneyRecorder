@@ -132,7 +132,7 @@ class _VideoPageState extends State<VideoPage> {
           /////////////////////////////////////////////
           try {
             marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[i][2],fields[i][5]);
-            marker_data_objects[difference.toString()] = mdata;
+            marker_data_objects[fields[i][6].toString()] = mdata;
 
           } catch (e, s) {
             marker_data mdata = new marker_data(LatLng(double.parse(lat), double.parse(long)), fields[i][2],i*4%360);
@@ -147,6 +147,8 @@ class _VideoPageState extends State<VideoPage> {
           totalTime = difference;
         }
       }
+      print(multipleCoord);
+
 
       print(fields[0][5].toString()+"----------------------totalime");
       LatLng? data = multipleCoord["0"];

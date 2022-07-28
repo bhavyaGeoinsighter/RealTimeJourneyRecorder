@@ -22,13 +22,14 @@ class settingsModelAdapter extends TypeAdapter<settingsModel> {
       showMap: fields[2] as bool,
       mapType: fields[3] as String,
       autoPlayPause: fields[4] as bool,
+      speedThreshold: fields[5] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, settingsModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.resolution)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class settingsModelAdapter extends TypeAdapter<settingsModel> {
       ..writeByte(3)
       ..write(obj.mapType)
       ..writeByte(4)
-      ..write(obj.autoPlayPause);
+      ..write(obj.autoPlayPause)
+      ..writeByte(5)
+      ..write(obj.speedThreshold);
   }
 
   @override

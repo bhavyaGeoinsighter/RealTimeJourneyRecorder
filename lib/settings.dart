@@ -23,6 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   late String _chosenValue;
   late String mapType;
+  late String speedThreshold;
 
   late bool isSkipped = tokenBox.get('token')?.token.toString().length==0;
 
@@ -37,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showMap = settingsBox.get('settings')!.showMap;
     autoPlayPause =settingsBox.get('settings')!.autoPlayPause;
     mapType = settingsBox.get('settings')!.mapType;
+    speedThreshold = settingsBox.get('settings')!.speedThreshold;
 
     print(settingsBox.get('settings')!.showMap.toString()+"   ----$showMap------------new shomap");
 
@@ -89,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (String? value) {
                         setState(() {
                           _chosenValue = value!;
-                          settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause );
+                          settingsModel sm = settingsModel(resolution: value.toString(), automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold:settingsBox.get('settings')!.speedThreshold  );
                           settingsBox.put('settings', sm);
                           print(settingsBox.get('settings')!.resolution.toString()+"------------new resolution");
                         });
@@ -124,14 +126,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           autoupload = value;
                           print("value --------------------- $value");
                           if(value){
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true,showMap:settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause );
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: true,showMap:settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold:settingsBox.get('settings')!.speedThreshold );
                             settingsBox.put('settings', sm);
                             print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
                             upload.autoUpload();
 
                           }
                           else{
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: false,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold:settingsBox.get('settings')!.speedThreshold);
                             settingsBox.put('settings', sm);
                             print("automatic --------------------- " + settingsBox.get('settings')!.automatic.toString());
 
@@ -163,11 +165,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         setState(() {
                           showMap = value!;
                           if(value){
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: true,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: true,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold:settingsBox.get('settings')!.speedThreshold);
                             settingsBox.put('settings', sm);
                           }
                           else{
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: false,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: false,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold:settingsBox.get('settings')!.speedThreshold);
                             settingsBox.put('settings', sm);
                           }
                           print("value --------------------- $value");
@@ -204,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (String? value) {
                         setState(() {
                           mapType = value!;
-                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType: mapType.toString(),autoPlayPause: settingsBox.get('settings')!.autoPlayPause);
+                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType: mapType.toString(),autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold:settingsBox.get('settings')!.speedThreshold);
                           settingsBox.put('settings', sm);
                           print(settingsBox.get('settings')!.mapType.toString()+"------------new type");
                         });
@@ -225,11 +227,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         setState(() {
                           autoPlayPause = value!;
                           if(value){
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: true);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: true,speedThreshold:settingsBox.get('settings')!.speedThreshold);
                             settingsBox.put('settings', sm);
                           }
                           else{
-                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: false);
+                            settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: false,speedThreshold:settingsBox.get('settings')!.speedThreshold);
                             settingsBox.put('settings', sm);
                           }
                           print("value --------------------- $value");
@@ -240,6 +242,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     },
                   ),
+                  ListTile(
+                    leading: Icon(Icons.satellite),
+                    title: Text("speed Threshold for motion detection"),
+                    trailing:  DropdownButton<String>(
+                      focusColor:Colors.white,
+                      value: speedThreshold,
+                      //elevation: 5,
+                      style: TextStyle(color: Colors.white),
+                      iconEnabledColor:Colors.black,
+                      items: <String>[
+                        // '144p',
+                        '0.1 m/s',
+                        '0.5 m/s',
+                        '1 m/s',
+                        '2 m/s',
+                        '3 m/s',
+                        '5 m/s'
+
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value,style:TextStyle(color:Colors.black),),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          speedThreshold = value!;
+                          settingsModel sm = settingsModel(resolution: settingsBox.get('settings')!.resolution, automatic: settingsBox.get('settings')!.automatic,showMap: settingsBox.get('settings')!.showMap,mapType:settingsBox.get('settings')!.mapType,autoPlayPause: settingsBox.get('settings')!.autoPlayPause,speedThreshold: speedThreshold.toString());
+                          settingsBox.put('settings', sm);
+                          print(settingsBox.get('settings')!.mapType.toString()+"------------new type");
+                        });
+                      },
+                    ),
+                    onTap: (){
+
+                    },
+                  ),
+
                 ],
               ),
 

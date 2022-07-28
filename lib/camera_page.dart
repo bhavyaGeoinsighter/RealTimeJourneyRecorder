@@ -241,7 +241,8 @@ class _CameraPageState extends State<CameraPage> {
       String altitude = currentLocation.altitude.toString();
       String speed = currentLocation.speed.toString();
       // String speedAcurracy = position.speedAccuracy.toString();
-      csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing\n',mode: FileMode.append);
+      String stopwatchTime = stopwatch.elapsed.inSeconds.toString();
+      csvFile.writeAsString('GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing,$stopwatchTime\n',mode: FileMode.append);
 
 
 
@@ -285,10 +286,15 @@ class _CameraPageState extends State<CameraPage> {
       String altitude = currentLocation.altitude.toString();
       String speed = currentLocation.speed.toString();
       // String speedAcurracy = position.speedAccuracy.toString();
-      if(currentLocation.speed! >=0.15) {
-        csvFile.writeAsString(
-            'GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing\n',
-            mode: FileMode.append);
+      String stopwatchTime = stopwatch.elapsed.inSeconds.toString();
+
+      csvFile.writeAsString(
+          'GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing,$stopwatchTime\n',
+          mode: FileMode.append);
+      if(currentLocation.speed! >= _speedThreshlod()) {
+        // csvFile.writeAsString(
+        //     'GPS($latitude $longitude),$currTime,$accuracy,$speed,$altitude,$bearing\n',
+        //     mode: FileMode.append);
         _cameraController.resumeVideoRecording();
         stopwatch.start();
       }
@@ -306,6 +312,27 @@ class _CameraPageState extends State<CameraPage> {
 
   }
 
+
+  double _speedThreshlod() {
+    if (settingsBox.get('settings')!.speedThreshold == '0.1 m/s') {
+      return 0.1;
+    }
+    else if (settingsBox.get('settings')!.speedThreshold == '0.5 m/s') {
+      return 0.5;
+    }
+    else if (settingsBox.get('settings')!.speedThreshold == '1 m/s') {
+      return 1.0;
+    }
+    else if (settingsBox.get('settings')!.speedThreshold == '2 m/s') {
+      return 2.0;
+    }
+    else if (settingsBox.get('settings')!.speedThreshold == '3 m/s') {
+      return 3.0;
+    }
+    else {
+      return 5.0;
+    }
+  }
 
 
 
